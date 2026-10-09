@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Portal — TossArena</title>
+  <title>Admin Portal Login — TossArena</title>
   <meta name="description" content="Administrative access portal for TossArena cricket toss management.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,8 +11,28 @@
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
+  <style>
+    .admin-login-card {
+      max-width: 440px;
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem 2rem;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    }
+    .danger-callout {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px dashed rgba(239, 68, 68, 0.35);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1rem;
+      font-size: 0.85rem;
+      color: #fee2e2;
+      margin-bottom: 1.25rem;
+    }
+  </style>
 </head>
-<body>
+<body style="background: var(--bg-primary); display: flex; flex-direction: column; min-height: 100vh;">
   <header class="site-header">
     <div class="container navbar">
       <a href="../index.html" class="brand-logo">
@@ -24,24 +44,62 @@
   </header>
 
   <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 1rem;">
-    <div class="card card-glass" style="max-width: 440px; width: 100%; text-align: center;">
-      <span class="badge badge-dev" style="margin-bottom: 1rem;">Under Construction • Planned Day 12</span>
-      <h1 style="font-size: 1.75rem; margin-bottom: 0.5rem;">Admin Access Portal</h1>
-      <p style="margin-bottom: 1.5rem; font-size: 0.9rem;">
-        Role-based administrator panel for cricket fixture creation and official toss result declaration is scheduled for Day 12.
-      </p>
-
-      <div style="background: rgba(239, 68, 68, 0.05); border: 1px dashed rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem; text-align: left;">
-        <div style="font-weight: 600; color: #f87171; font-size: 0.85rem; margin-bottom: 0.5rem;">
-          🔒 Restricted Administrative Privileges:
-        </div>
-        <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">
-          Only users with verified 'admin' database roles will be authorized to access match creation, toss resolution, and ledger audit controls.
+    <div class="admin-login-card">
+      <div style="text-align: center; margin-bottom: 1.75rem;">
+        <span class="badge badge-amber" style="margin-bottom: 0.75rem;">🛡️ Administrator Access</span>
+        <h1 style="font-size: 1.75rem; font-family: var(--font-display); margin-bottom: 0.35rem;">
+          Control Panel
+        </h1>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin: 0;">
+          Sign in with authorized administrator credentials to manage matches.
         </p>
       </div>
 
-      <div style="display: flex; gap: 0.75rem; justify-content: center;">
-        <a href="../index.html" class="btn btn-secondary btn-sm">Return Home</a>
+      <div id="loginErrorBox" class="danger-callout" style="display: none;"></div>
+
+      <form id="adminLoginForm">
+        <div class="form-group" style="margin-bottom: 1.15rem;">
+          <label for="adminEmail" style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.35rem; display: block;">
+            Administrator Email
+          </label>
+          <input
+            type="email"
+            id="adminEmail"
+            class="form-control"
+            placeholder="admin@tossarena.com"
+            required
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+            <label for="adminPassword" style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); margin: 0;">
+              Password
+            </label>
+            <button type="button" class="btn-link" data-toggle-password="adminPassword" style="font-size: 0.75rem; color: var(--accent-mint); background: none; border: none; cursor: pointer; padding: 0;">
+              Show
+            </button>
+          </div>
+          <input
+            type="password"
+            id="adminPassword"
+            class="form-control"
+            placeholder="••••••••••••"
+            required
+            autocomplete="current-password"
+          >
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-sm" id="btnAdminLogin" style="width: 100%; padding: 0.75rem; font-size: 0.95rem;">
+          Authenticate &amp; Enter
+        </button>
+      </form>
+
+      <div style="margin-top: 1.5rem; text-align: center; border-top: 1px solid var(--border-subtle); padding-top: 1.25rem;">
+        <a href="matches.html" style="font-size: 0.82rem; color: var(--accent-mint); text-decoration: none;">
+          Already signed in? Go to Matches →
+        </a>
       </div>
     </div>
   </main>
@@ -51,5 +109,57 @@
       <p>&copy; 2026 TossArena. A cricket toss prediction platform.</p>
     </div>
   </footer>
+
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Check if already authenticated as admin
+      try {
+        const user = await window.TossArenaAuth.getCurrentUser();
+        if (user && user.role === 'admin') {
+          window.location.href = 'matches.html';
+          return;
+        }
+      } catch (_) {}
+
+      const loginForm = document.getElementById('adminLoginForm');
+      const errorBox = document.getElementById('loginErrorBox');
+      const submitBtn = document.getElementById('btnAdminLogin');
+
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorBox.style.display = 'none';
+        errorBox.textContent = '';
+
+        const email = document.getElementById('adminEmail').value.trim();
+        const password = document.getElementById('adminPassword').value;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Verifying credentials...';
+
+        try {
+          const result = await window.TossArenaAuth.login({ email, password });
+          const user = result.user;
+
+          if (user && user.role === 'admin') {
+            window.location.href = 'matches.html';
+          } else {
+            // Not an administrator
+            await window.TossArenaAuth.logout();
+            errorBox.textContent = 'Access Denied: Your account does not have verified administrator privileges.';
+            errorBox.style.display = 'block';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Authenticate & Enter';
+          }
+        } catch (err) {
+          errorBox.textContent = err.message || 'Login failed. Please verify credentials.';
+          errorBox.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Authenticate & Enter';
+        }
+      });
+    });
+  </script>
 </body>
 </html>

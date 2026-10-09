@@ -553,7 +553,104 @@ npm test
 
 ---
 
-## 14. 20-Day Development Roadmap
+---
+
+## 14. Day 10: Prediction History, Prediction Details, User Statistics & Performance Dashboard
+
+### 14.1 Core Architecture & Verification Rules
+TossArena Day 10 introduces a complete, secure prediction history and user statistics dashboard powered 100% by authoritative MySQL records.
+- **Strict Verification Policy:** Predictions remain `pending` until an official toss result (`result_toss_winner`) is recorded in the database. Match start time or match completion does not arbitrarily mark a forecast as correct or incorrect.
+- **Outcome States:**
+  - `pending`: Match toss outcome has not yet taken place or official toss result has not been recorded in database.
+  - `correct`: User's forecast strictly matches the official `result_toss_winner`.
+  - `incorrect`: User's forecast does not match the official `result_toss_winner`.
+  - `void`: Match was cancelled or abandoned.
+- **Authoritative Accuracy Calculation:**
+  $$\text{Accuracy (\%)} = \frac{\text{Correct Predictions}}{\text{Correct Predictions} + \text{Incorrect Predictions}} \times 100$$
+  - Pending predictions and voided matches are strictly excluded from the accuracy calculation.
+  - If no finalized predictions exist, the backend returns `0.0%` with `hasFinalizedOutcomes: false`, preventing division by zero.
+- **Security & IDOR Defense:** All history and detail queries derive user identity exclusively from the authenticated server-side session (`req.session.userId`). Attempts to fetch another user's prediction (`GET /api/predictions/:id`) return HTTP 404 without leaking record existence.
+
+### 14.2 Database Changes (Migration `004`)
+- **Status Enum Extension:** Added `'void'` to `predictions.status` (`ENUM('pending', 'correct', 'incorrect', 'cancelled', 'void')`).
+- **Composite Indexes:**
+  - `idx_predictions_user_created` on `(user_id, created_at)`
+  - `idx_predictions_user_status` on `(user_id, status)`
+  - `idx_predictions_match_created` on `(match_id, created_at)`
+
+### 14.3 API Endpoints
+- `GET /api/predictions` (or `GET /api/predictions/me`)
+  - **Auth:** Required (`authenticate`).
+  - **Query Parameters:**
+    - `page` (integer, default 1)
+    - `limit` (integer, default 10, max 50)
+    - `search` (string, searches match teams, title, tournament)
+    - `status` (`all`, `pending`, `correct`, `incorrect`, `void`)
+    - `datePreset` (`all`, `7days`, `30days`, `custom`)
+    - `dateFrom`, `dateTo` (YYYY-MM-DD format for custom range)
+    - `sort` (`newest`, `oldest`, `match_date_asc`, `match_date_desc`)
+  - **Returns:** `{ success: true, data: { predictions: [...], pagination: { page, limit, total, totalPages } } }`
+- `GET /api/predictions/:id`
+  - **Auth:** Required (`authenticate`).
+  - **Returns:** Single prediction details with full match metadata, verified toss result, and linked ledger transactions (if any).
+- `GET /api/predictions/statistics` (and alias `GET /api/dashboard/statistics`)
+  - **Auth:** Required (`authenticate`).
+  - **Returns:** Lifetime forecast metrics, pending count, verified wins/losses, voided count, accuracy percentage, and timeframe aggregations (last 7 and 30 days).
+
+### 14.4 Running Day 10 Automated Tests
+```bash
+# Run Day 10 test suite (34 tests)
+npm run test:history
+
+# Run full project regression suite (154 tests across Days 1–10)
+npm test
+```
+
+---
+
+---
+
+## 15. Day 11: Admin Match Management System, Status Controls & Prediction Protection
+
+### 15.1 Architectural Overview
+Day 11 implements a complete, enterprise-grade administrative match management workflow. All controls are backed by authoritative MySQL queries, strict role-based authorization (`authenticate, authorize('admin')`), and immutable audit logging.
+
+### 15.2 Strict Prediction Integrity Protection
+To maintain the mathematical and historical integrity of user predictions:
+1. **Team Rename Guard:** If a match has $\ge 1$ existing user prediction, attempting to rename `team_a` or `team_b` is strictly rejected with **HTTP 409 Conflict** (`CANNOT_RENAME_TEAMS_WITH_EXISTING_PREDICTIONS`). Modifying team identities would corrupt historical toss forecasts.
+2. **Safe Metadata Editing:** Allowed fields such as `tournament_name`, `venue`, and `scheduled_at` can still be updated safely even when predictions exist.
+3. **Cancellation Preservation:** Cancelling a fixture safely transitions its status to `cancelled` without deleting historical predictions or altering wallet ledger records.
+4. **Terminal State Immutability:** Fixtures in `completed` or `cancelled` status cannot transition backwards to active states.
+
+### 15.3 Status Lifecycle Transitions
+- `upcoming` $\rightarrow$ `open`, `cancelled`
+- `open` $\rightarrow$ `locked`, `cancelled`
+- `locked` $\rightarrow$ `completed`, `open` (only if scheduled time has not passed), `cancelled`
+- `completed` $\rightarrow$ Terminal (immutable)
+- `cancelled` $\rightarrow$ Terminal (immutable)
+
+### 15.4 Admin API Endpoints
+All admin endpoints are mounted under `/api/admin` and require administrator authorization:
+- `GET /api/admin/matches/summary` - Aggregate match breakdown metrics (Total, Open, Upcoming, Locked, Completed, Cancelled, Total Predictions).
+- `GET /api/admin/matches` - Paginated, searchable, filtered match fixtures with joined prediction counts.
+- `GET /api/admin/matches/:id` - Full match details with prediction volume and team pick breakdown percentages.
+- `POST /api/admin/matches` (CSRF Protected) - Creates a new cricket match fixture with distinct teams and future schedule.
+- `PATCH /api/admin/matches/:id` (CSRF Protected) - Updates metadata with prediction protection rules.
+- `PATCH /api/admin/matches/:id/status` (CSRF Protected) - Controls lifecycle status transitions.
+- `POST /api/admin/matches/:id/cancel` (CSRF Protected) - Safely cancels fixture with audit reason.
+
+### 15.5 Running Day 11 Automated Tests
+```bash
+# Run Day 11 test suite (27 tests)
+npm run test:admin
+
+# Run full project regression suite across all days
+npm test
+```
+
+---
+
+## 16. 20-Day Development Roadmap
 
 | Day | Milestone Focus |
 | :---: | :--- |
@@ -566,21 +663,22 @@ npm test
 | **Day 7** | **Toss Prediction Engine: Market Rules, Cutoff Times & Submission (Completed)** |
 | **Day 8** | **Virtual Demo Credit Wallet System, Ledger Audit Trails & Balance Management (Completed)** |
 | **Day 9** | **Virtual Demo Credit Addition, Wallet Funding Simulation & Transaction History (Completed)** |
-| **Day 10** | Prediction Placement Frontend Interface & Real-Time Balance Validation |
-| **Day 11** | User Active Predictions & Historical Prediction Log Views |
+| **Day 10** | **Prediction History, Prediction Details, User Statistics & Performance Dashboard (Completed)** |
+| **Day 11** | **Admin Match Management, Match Scheduling, Status Controls & Secure Backend Integration (Completed)** |
 | **Day 12** | Admin Portal Authentication, Role Verification & Admin Layout |
 | **Day 13** | Admin Match Management & Official Toss Result Recording Interface |
 | **Day 14** | Automated Virtual Credit Settlement Engine & Balance Payouts |
 | **Day 15** | Admin Analytics Dashboard: Prediction Volume & Win/Loss Ratios |
 | **Day 16** | Real-Time Notification Foundation (Socket.IO integration) |
-| **Day 17** | Interactive Chart.js Visualizations for User & Admin Dashboards |
+| **Day 17** | Interactive Chart Visualizations for User & Admin Dashboards |
 | **Day 18** | Comprehensive Responsive UI Audit (Mobile, Tablet, Desktop) & Micro-Animations |
 | **Day 19** | End-to-End Integration Testing, Security Hardening & Edge Case Handling |
 | **Day 20** | Production Deployment Preparation, Environment Verification & Final Polish |
 
 ---
 
-## 15. License & Disclaimer
+## 17. License & Disclaimer
 
 This project is licensed under the ISC License. Strictly for demonstration and simulation purposes with 100% virtual demo credits. Real currency betting, payments, and cash redemptions are strictly prohibited.
+
 

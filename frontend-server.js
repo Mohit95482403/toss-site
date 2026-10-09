@@ -29,6 +29,25 @@ const server = http.createServer((req, res) => {
     if (!safeRel) safeRel = 'index.html';
     safeRel = path.normalize(safeRel).replace(/^(\.\.[\/\\])+/, '');
 
+    const normalizedRel = safeRel.replace(/\\/g, '/');
+
+    // Route aliases for clean URLs
+    if (normalizedRel === 'predictions' || normalizedRel === 'predictions.html') {
+      safeRel = path.join('user', 'predictions.html');
+    } else if (normalizedRel === 'dashboard' || normalizedRel === 'dashboard/statistics') {
+      safeRel = path.join('user', 'dashboard.html');
+    } else if (normalizedRel === 'wallet') {
+      safeRel = path.join('user', 'wallet.html');
+    } else if (normalizedRel === 'profile') {
+      safeRel = path.join('user', 'profile.html');
+    } else if (normalizedRel === 'matches') {
+      safeRel = path.join('pages', 'matches.html');
+    } else if (normalizedRel === 'admin/matches' || normalizedRel === 'admin/matches.html') {
+      safeRel = path.join('admin', 'matches.html');
+    } else if (normalizedRel === 'admin' || normalizedRel === 'admin/login') {
+      safeRel = path.join('admin', 'login.html');
+    }
+
     const filePath = path.resolve(FRONTEND_DIR, safeRel);
 
     if (!filePath.startsWith(FRONTEND_DIR)) {

@@ -5,6 +5,7 @@
  */
 
 const { pool } = require('../config/db');
+const predictionService = require('../services/predictionService');
 
 /**
  * GET /api/dashboard/summary
@@ -151,7 +152,24 @@ async function getActivity(req, res, next) {
   }
 }
 
+/**
+ * GET /api/dashboard/statistics
+ * Returns authoritative user prediction performance statistics
+ */
+async function getStatistics(req, res, next) {
+  try {
+    const stats = await predictionService.getUserPredictionStatistics(req.user.id);
+    return res.status(200).json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getSummary,
-  getActivity
+  getActivity,
+  getStatistics
 };

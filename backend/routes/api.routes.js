@@ -37,6 +37,10 @@ router.use('/predictions', predictionRoutes);
 const walletRoutes = require('./walletRoutes');
 router.use('/wallet', walletRoutes);
 
+// Admin Management endpoints (Day 11)
+const adminRoutes = require('./adminRoutes');
+router.use('/admin', adminRoutes);
+
 module.exports = router;
 
 

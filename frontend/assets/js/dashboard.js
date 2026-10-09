@@ -31,6 +31,7 @@ async function initUserDashboard() {
   initProfileForm();
   initWalletControls();
   initDemoPackageControls();
+  initPredictionControls();
 
   // 3. Load live backend data
   loadDashboardSummary();
@@ -385,9 +386,10 @@ function initDashboardNavigation() {
       profileLinks.forEach((l) => l.classList.add('active'));
     } else if (section === 'predictions') {
       if (predictionsSection) predictionsSection.style.display = 'flex';
-      if (pageTitle) pageTitle.textContent = 'My Toss Predictions';
+      if (pageTitle) pageTitle.textContent = 'My Predictions & Performance';
       predictionsLinks.forEach((l) => l.classList.add('active'));
-      loadMyPredictionsHistory();
+      loadPredictionStatistics();
+      loadMyPredictionsHistory(1);
     } else if (section === 'wallet') {
       if (walletSection) walletSection.style.display = 'flex';
       if (pageTitle) pageTitle.textContent = 'My Wallet';
@@ -426,57 +428,230 @@ function initDashboardNavigation() {
   // Auto-activate section based on page pathname or hash
   if (window.location.pathname.includes('wallet.html') || window.location.hash === '#wallet') {
     showSection('wallet');
-  } else if (window.location.hash === '#predictions') {
+  } else if (window.location.pathname.includes('predictions.html') || window.location.hash === '#predictions') {
     showSection('predictions');
   }
 }
 
-/**
- * Loads user predictions history from /api/predictions/me
- */
-async function loadMyPredictionsHistory() {
-  const container = document.getElementById('predictionsListContainer');
-  const countIndicator = document.getElementById('predictionCountIndicator');
-  if (!container) return;
+/* ==========================================================================
+   DAY 10: PREDICTION HISTORY, STATISTICS & DETAILS MODAL
+   ========================================================================== */
 
-  container.innerHTML = `
-    <div class="skeleton-card skeleton-shimmer" style="height: 80px;"></div>
-    <div class="skeleton-card skeleton-shimmer" style="height: 80px;"></div>
-  `;
+let currentPredPage = 1;
+let currentPredLimit = 10;
+let currentPredSearch = '';
+let currentPredStatus = 'all';
+let currentPredDatePreset = 'all';
+let currentPredDateFrom = '';
+let currentPredDateTo = '';
+let currentPredSort = 'newest';
+let totalPredPages = 1;
+let totalPredCount = 0;
+let searchDebounceTimer = null;
+
+/**
+ * Loads authoritative user prediction statistics from /api/predictions/statistics
+ */
+async function loadPredictionStatistics() {
+  const statTotal = document.getElementById('statTotalPredictions');
+  const statPending = document.getElementById('statPendingPredictions');
+  const statCorrect = document.getElementById('statCorrectPredictions');
+  const statIncorrect = document.getElementById('statIncorrectPredictions');
+  const statVoid = document.getElementById('statVoidPredictions');
+  const statAccuracy = document.getElementById('statAccuracyRate');
+  const statAccuracySubtext = document.getElementById('statAccuracySubtext');
+  const statTotalSubtext = document.getElementById('statTotalSubtext');
+
+  const segCorrect = document.getElementById('perfSegmentCorrect');
+  const segIncorrect = document.getElementById('perfSegmentIncorrect');
+  const segPending = document.getElementById('perfSegmentPending');
+  const segVoid = document.getElementById('perfSegmentVoid');
+  const distSummary = document.getElementById('perfDistributionSummary');
+
+  const legCorrect = document.getElementById('legendCorrectCount');
+  const legIncorrect = document.getElementById('legendIncorrectCount');
+  const legPending = document.getElementById('legendPendingCount');
+  const legVoid = document.getElementById('legendVoidCount');
 
   try {
-    const config = window.TossArenaConfig || {};
-    const url = config.getApiUrl
-      ? config.getApiUrl(`${config.ENDPOINTS.PREDICTIONS || '/predictions'}/me`)
-      : 'http://localhost:5000/api/predictions/me';
+    const stats = await window.TossArenaAuth.getPredictionStatistics();
+    if (!stats) return;
 
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' },
-      credentials: 'include'
-    });
+    const total = Number(stats.totalPredictions || 0);
+    const pending = Number(stats.pendingPredictions || 0);
+    const correct = Number(stats.correctPredictions || 0);
+    const incorrect = Number(stats.incorrectPredictions || 0);
+    const voided = Number(stats.voidPredictions || 0);
+    const accuracy = Number(stats.accuracyRate || 0);
+    const finalized = Number(stats.finalizedPredictions || 0);
 
-    if (!res.ok) throw new Error('Failed to load predictions history.');
+    if (statTotal) statTotal.textContent = total.toLocaleString();
+    if (statPending) statPending.textContent = pending.toLocaleString();
+    if (statCorrect) statCorrect.textContent = correct.toLocaleString();
+    if (statIncorrect) statIncorrect.textContent = incorrect.toLocaleString();
+    if (statVoid) statVoid.textContent = voided.toLocaleString();
 
-    const payload = await res.json();
-    const predictions = Array.isArray(payload.data) ? payload.data : [];
-
-    if (countIndicator) {
-      countIndicator.textContent = `${predictions.length} prediction${predictions.length === 1 ? '' : 's'}`;
+    if (statAccuracy) {
+      if (stats.hasFinalizedOutcomes) {
+        statAccuracy.textContent = `${accuracy.toFixed(1)}%`;
+      } else {
+        statAccuracy.textContent = '0.0%';
+      }
     }
 
+    if (statAccuracySubtext) {
+      if (stats.hasFinalizedOutcomes) {
+        statAccuracySubtext.textContent = `${correct} win${correct === 1 ? '' : 's'} / ${finalized} verified`;
+      } else {
+        statAccuracySubtext.textContent = 'Awaiting verified outcomes';
+      }
+    }
+
+    if (statTotalSubtext && stats.timeframes) {
+      statTotalSubtext.textContent = `${stats.timeframes.last30Days || 0} in last 30 days`;
+    }
+
+    // Update Performance Distribution Bar
+    if (total > 0) {
+      const pCorrect = (correct / total) * 100;
+      const pIncorrect = (incorrect / total) * 100;
+      const pPending = (pending / total) * 100;
+      const pVoid = (voided / total) * 100;
+
+      if (segCorrect) segCorrect.style.width = `${pCorrect}%`;
+      if (segIncorrect) segIncorrect.style.width = `${pIncorrect}%`;
+      if (segPending) segPending.style.width = `${pPending}%`;
+      if (segVoid) segVoid.style.width = `${pVoid}%`;
+
+      if (distSummary) {
+        distSummary.textContent = `${total} Total • ${finalized} Finalized • ${pending} Pending`;
+      }
+    } else {
+      if (segCorrect) segCorrect.style.width = '0%';
+      if (segIncorrect) segIncorrect.style.width = '0%';
+      if (segPending) segPending.style.width = '0%';
+      if (segVoid) segVoid.style.width = '0%';
+      if (distSummary) distSummary.textContent = 'No forecasts recorded yet';
+    }
+
+    if (legCorrect) legCorrect.textContent = correct;
+    if (legIncorrect) legIncorrect.textContent = incorrect;
+    if (legPending) legPending.textContent = pending;
+    if (legVoid) legVoid.textContent = voided;
+  } catch (err) {
+    console.error('Failed to load prediction statistics:', err);
+    if (statTotal) statTotal.textContent = '—';
+    if (statPending) statPending.textContent = '—';
+    if (statCorrect) statCorrect.textContent = '—';
+    if (statIncorrect) statIncorrect.textContent = '—';
+    if (statVoid) statVoid.textContent = '—';
+    if (statAccuracy) statAccuracy.textContent = '—';
+  }
+}
+
+/**
+ * Loads user predictions history from /api/predictions with search, filters, sort, and pagination
+ */
+async function loadMyPredictionsHistory(page = 1) {
+  const container = document.getElementById('predictionsListContainer');
+  const countIndicator = document.getElementById('predictionCountIndicator');
+  const emptyState = document.getElementById('predEmptyState');
+  const errorState = document.getElementById('predErrorState');
+  const paginationBar = document.getElementById('predPaginationBar');
+  const pageInfo = document.getElementById('predPaginationInfo');
+  const pageIndicator = document.getElementById('predPageIndicator');
+  const prevBtn = document.getElementById('predPrevPageBtn');
+  const nextBtn = document.getElementById('predNextPageBtn');
+
+  if (!container) return;
+
+  currentPredPage = page;
+
+  // Reset view to loading
+  container.style.display = 'flex';
+  container.innerHTML = `
+    <div class="skeleton-card skeleton-shimmer" style="height: 100px;"></div>
+    <div class="skeleton-card skeleton-shimmer" style="height: 100px;"></div>
+    <div class="skeleton-card skeleton-shimmer" style="height: 100px;"></div>
+  `;
+  if (emptyState) emptyState.style.display = 'none';
+  if (errorState) errorState.style.display = 'none';
+
+  try {
+    const params = {
+      page: currentPredPage,
+      limit: currentPredLimit,
+      sort: currentPredSort
+    };
+
+    if (currentPredSearch && currentPredSearch.trim()) {
+      params.search = currentPredSearch.trim();
+    }
+    if (currentPredStatus && currentPredStatus !== 'all') {
+      params.status = currentPredStatus;
+    }
+    if (currentPredDatePreset && currentPredDatePreset !== 'all') {
+      params.datePreset = currentPredDatePreset;
+    }
+    if (currentPredDatePreset === 'custom') {
+      if (currentPredDateFrom) params.dateFrom = currentPredDateFrom;
+      if (currentPredDateTo) params.dateTo = currentPredDateTo;
+    }
+
+    const result = await window.TossArenaAuth.getPredictions(params);
+    const predictions = Array.isArray(result.predictions) ? result.predictions : [];
+    const pagination = result.pagination || { total: 0, totalPages: 1, page: 1, limit: 10 };
+
+    totalPredPages = pagination.totalPages || 1;
+    totalPredCount = pagination.total || 0;
+
+    if (countIndicator) {
+      countIndicator.textContent = `${totalPredCount} forecast${totalPredCount === 1 ? '' : 's'}`;
+    }
+
+    // Empty state handling
     if (predictions.length === 0) {
-      container.innerHTML = `
-        <div class="state-box" style="margin: var(--space-4) 0; border-style: dashed;">
-          <div class="state-icon">🎯</div>
-          <h3 class="state-title">No Predictions Yet</h3>
-          <p class="state-desc">You haven't predicted any coin toss outcomes yet. Browse scheduled fixtures to forecast toss winners!</p>
-          <a href="../pages/matches.html" class="btn btn-primary btn-sm">Explore Open Fixtures →</a>
-        </div>
-      `;
+      container.style.display = 'none';
+      if (paginationBar) paginationBar.style.display = 'none';
+
+      if (emptyState) {
+        emptyState.style.display = 'block';
+        const emptyTitle = document.getElementById('predEmptyTitle');
+        const emptyDesc = document.getElementById('predEmptyMessage');
+        const emptyActions = document.getElementById('predEmptyActions');
+
+        const hasActiveFilters = Boolean(
+          (currentPredSearch && currentPredSearch.trim()) ||
+          (currentPredStatus && currentPredStatus !== 'all') ||
+          (currentPredDatePreset && currentPredDatePreset !== 'all')
+        );
+
+        if (hasActiveFilters) {
+          if (emptyTitle) emptyTitle.textContent = 'No matching predictions found';
+          if (emptyDesc) emptyDesc.textContent = 'Try adjusting or clearing your search keywords and status filters.';
+          if (emptyActions) {
+            emptyActions.innerHTML = `
+              <button type="button" class="btn btn-primary btn-sm" id="btnEmptyClearFilters">
+                Clear All Filters
+              </button>
+            `;
+            const btn = document.getElementById('btnEmptyClearFilters');
+            if (btn) btn.addEventListener('click', resetPredictionFilters);
+          }
+        } else {
+          if (emptyTitle) emptyTitle.textContent = "You haven't made any predictions yet.";
+          if (emptyDesc) emptyDesc.textContent = 'Browse our scheduled international and domestic matches to forecast coin toss winners.';
+          if (emptyActions) {
+            emptyActions.innerHTML = `
+              <a href="../pages/matches.html" class="btn btn-primary btn-sm">Explore Open Fixtures →</a>
+            `;
+          }
+        }
+      }
       return;
     }
 
+    // Render prediction items
     container.innerHTML = '';
     predictions.forEach((p) => {
       const item = document.createElement('div');
@@ -484,17 +659,27 @@ async function loadMyPredictionsHistory() {
 
       const safeTeamA = escapeHtml(p.teamA || 'Team A');
       const safeTeamB = escapeHtml(p.teamB || 'Team B');
-      const safePicked = escapeHtml(p.predictedTeam || 'TBD');
+      const safePicked = escapeHtml(p.predictedTossWinner || 'TBD');
       const safeTournament = escapeHtml(p.tournamentName || 'Cricket Match');
       const statusKey = (p.predictionStatus || 'pending').toLowerCase();
+      const matchStatus = (p.matchStatus || 'upcoming').toUpperCase();
 
-      let statusBadge = `<span class="badge badge-amber" style="font-size: 0.7rem;">PENDING</span>`;
+      // Outcome Badge
+      let statusBadge = `<span class="badge badge-amber" style="font-size: 0.72rem;">⏳ PENDING</span>`;
       if (statusKey === 'correct') {
-        statusBadge = `<span class="badge badge-emerald" style="font-size: 0.7rem;">✓ CORRECT</span>`;
+        statusBadge = `<span class="badge badge-emerald" style="font-size: 0.72rem;">✓ CORRECT</span>`;
       } else if (statusKey === 'incorrect') {
-        statusBadge = `<span class="badge" style="background: rgba(239,68,68,0.15); color: #fca5a5; font-size: 0.7rem;">✕ INCORRECT</span>`;
-      } else if (statusKey === 'cancelled') {
-        statusBadge = `<span class="badge" style="font-size: 0.7rem;">CANCELLED</span>`;
+        statusBadge = `<span class="badge" style="background: rgba(239,68,68,0.15); color: #fca5a5; font-size: 0.72rem;">✕ INCORRECT</span>`;
+      } else if (statusKey === 'void' || statusKey === 'cancelled') {
+        statusBadge = `<span class="badge" style="background: rgba(148,163,184,0.15); color: #cbd5e1; font-size: 0.72rem;">⚪ VOID</span>`;
+      }
+
+      // Match Status Badge
+      let matchStatusBadge = `<span class="badge badge-outline" style="font-size: 0.65rem; border-color: rgba(255,255,255,0.2);">${matchStatus}</span>`;
+      if (matchStatus === 'LIVE') {
+        matchStatusBadge = `<span class="badge badge-emerald" style="font-size: 0.65rem;">● LIVE</span>`;
+      } else if (matchStatus === 'COMPLETED') {
+        matchStatusBadge = `<span class="badge" style="font-size: 0.65rem; background: rgba(255,255,255,0.06); color: var(--text-muted);">FINAL</span>`;
       }
 
       const matchSchedule = p.scheduledAt
@@ -502,19 +687,26 @@ async function loadMyPredictionsHistory() {
         : 'TBD';
 
       const submittedAt = p.createdAt
-        ? new Date(p.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+        ? new Date(p.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
         : 'Recorded';
 
+      // Toss Result text
+      let tossResultNote = `<span style="color: var(--text-muted);">Toss: Awaiting match</span>`;
+      if (p.resultTossWinner) {
+        tossResultNote = `<span style="color: var(--accent-mint); font-weight: 600;">🏆 Toss Winner: ${escapeHtml(p.resultTossWinner)}</span>`;
+      }
+
       item.innerHTML = `
-        <div class="pred-item-main">
-          <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: 2px;">
-            <span style="font-size: var(--text-xs); color: var(--accent-mint); font-weight: 600;">${safeTournament}</span>
+        <div class="pred-item-main" style="flex: 1 1 300px;">
+          <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: 4px; flex-wrap: wrap;">
+            <span style="font-size: var(--text-xs); color: var(--accent-mint); font-weight: 700;">${safeTournament}</span>
+            ${matchStatusBadge}
             ${statusBadge}
           </div>
-          <div class="pred-item-match">
-            ${safeTeamA} <span style="color: var(--accent-gold); font-size: 0.85rem;">vs</span> ${safeTeamB}
+          <div class="pred-item-match" style="font-size: var(--text-base); margin-bottom: 2px;">
+            ${safeTeamA} <span style="color: var(--accent-gold); font-size: 0.85rem; font-weight: 600;">vs</span> ${safeTeamB}
           </div>
-          <div class="pred-item-meta">
+          <div class="pred-item-meta" style="margin-top: 2px;">
             <span>📅 Match: ${matchSchedule}</span>
             <span>📍 ${escapeHtml(p.venue || 'Neutral Ground')}</span>
             <span>⏱️ Submitted: ${submittedAt}</span>
@@ -522,27 +714,475 @@ async function loadMyPredictionsHistory() {
         </div>
 
         <div style="display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap;">
-          <div class="pred-item-pick-badge" title="Your Toss Prediction">
-            🪙 ${safePicked}
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+            <div class="pred-item-pick-badge" title="Your Toss Forecast">
+              🪙 ${safePicked}
+            </div>
+            <div style="font-size: 0.72rem; margin-top: 2px;">
+              ${tossResultNote}
+            </div>
           </div>
-          <a href="../pages/match-details.html?id=${encodeURIComponent(p.matchId)}" class="btn btn-outline btn-sm">
-            View Match →
-          </a>
+
+          <button type="button" class="btn btn-outline btn-sm btn-view-pred-details" data-pred-id="${p.id}" style="padding: 0.35rem 0.75rem; font-size: var(--text-xs);">
+            Details 🔍
+          </button>
         </div>
       `;
 
       container.appendChild(item);
     });
+
+    // Update Pagination Bar
+    if (paginationBar) {
+      paginationBar.style.display = totalPredPages > 1 || totalPredCount > 0 ? 'flex' : 'none';
+    }
+
+    const startIdx = (pagination.page - 1) * pagination.limit + 1;
+    const endIdx = Math.min(pagination.page * pagination.limit, totalPredCount);
+
+    if (pageInfo) {
+      pageInfo.textContent = totalPredCount > 0
+        ? `Showing ${startIdx}–${endIdx} of ${totalPredCount} predictions`
+        : '0 predictions';
+    }
+
+    if (pageIndicator) {
+      pageIndicator.textContent = `Page ${pagination.page} of ${totalPredPages}`;
+    }
+
+    if (prevBtn) {
+      prevBtn.disabled = pagination.page <= 1;
+    }
+    if (nextBtn) {
+      nextBtn.disabled = pagination.page >= totalPredPages;
+    }
+
   } catch (err) {
     console.error('Predictions load error:', err);
-    container.innerHTML = `
-      <div style="padding: var(--space-4); text-align: center; color: #fca5a5; font-size: var(--text-xs);">
-        Could not load predictions history. Please refresh the page.
-      </div>
-    `;
+    container.style.display = 'none';
+    if (paginationBar) paginationBar.style.display = 'none';
+    if (errorState) {
+      errorState.style.display = 'block';
+      const msg = document.getElementById('predErrorMessage');
+      if (msg) msg.textContent = err.message || 'An error occurred while fetching your prediction records.';
+    }
     if (countIndicator) countIndicator.textContent = 'Error';
   }
 }
+
+/**
+ * Resets prediction search and filters to default
+ */
+function resetPredictionFilters() {
+  currentPredSearch = '';
+  currentPredStatus = 'all';
+  currentPredDatePreset = 'all';
+  currentPredDateFrom = '';
+  currentPredDateTo = '';
+  currentPredSort = 'newest';
+
+  const searchInput = document.getElementById('predSearchInput');
+  const searchClear = document.getElementById('predSearchClear');
+  const statusFilter = document.getElementById('predStatusFilter');
+  const dateFilter = document.getElementById('predDateFilter');
+  const sortFilter = document.getElementById('predSortFilter');
+  const customDates = document.getElementById('predCustomDatesWrap');
+  const dateFrom = document.getElementById('predDateFrom');
+  const dateTo = document.getElementById('predDateTo');
+
+  if (searchInput) searchInput.value = '';
+  if (searchClear) searchClear.style.display = 'none';
+  if (statusFilter) statusFilter.value = 'all';
+  if (dateFilter) dateFilter.value = 'all';
+  if (sortFilter) sortFilter.value = 'newest';
+  if (customDates) customDates.classList.remove('is-active');
+  if (dateFrom) dateFrom.value = '';
+  if (dateTo) dateTo.value = '';
+
+  loadMyPredictionsHistory(1);
+}
+
+/**
+ * Opens Prediction Details modal and populates with verified database record
+ */
+async function openPredictionDetailsModal(predictionId) {
+  const modal = document.getElementById('predictionDetailsModal');
+  const content = document.getElementById('predModalBodyContent');
+  const matchLink = document.getElementById('predModalViewMatchLink');
+
+  if (!modal || !content) return;
+
+  modal.classList.add('is-open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+
+  content.innerHTML = `
+    <div class="skeleton-card skeleton-shimmer" style="height: 120px;"></div>
+    <div class="skeleton-card skeleton-shimmer" style="height: 120px;"></div>
+  `;
+
+  try {
+    const p = await window.TossArenaAuth.getPredictionDetails(predictionId);
+    if (!p) throw new Error('Prediction record not found.');
+
+    const match = p.match || {};
+    const safeTitle = escapeHtml(match.title || `${match.teamA || 'Team A'} vs ${match.teamB || 'Team B'}`);
+    const safeTourn = escapeHtml(match.tournamentName || 'Cricket Tournament');
+    const safeVenue = escapeHtml(match.venue || 'Neutral Ground');
+    const safePick = escapeHtml(p.predictedTossWinner || 'TBD');
+    const statusKey = (p.predictionStatus || 'pending').toLowerCase();
+
+    // Outcome Badge
+    let statusBadge = `<span class="badge badge-amber" style="font-size: 0.75rem;">⏳ PENDING</span>`;
+    if (statusKey === 'correct') {
+      statusBadge = `<span class="badge badge-emerald" style="font-size: 0.75rem;">✓ CORRECT</span>`;
+    } else if (statusKey === 'incorrect') {
+      statusBadge = `<span class="badge" style="background: rgba(239,68,68,0.15); color: #fca5a5; font-size: 0.75rem;">✕ INCORRECT</span>`;
+    } else if (statusKey === 'void' || statusKey === 'cancelled') {
+      statusBadge = `<span class="badge" style="background: rgba(148,163,184,0.15); color: #cbd5e1; font-size: 0.75rem;">⚪ VOID / ABANDONED</span>`;
+    }
+
+    const matchDateStr = match.scheduledAt
+      ? new Date(match.scheduledAt).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' })
+      : 'TBD';
+
+    const predCreatedStr = p.createdAt
+      ? new Date(p.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+      : 'Recorded';
+
+    const lockTimeStr = match.predictionLockTime
+      ? new Date(match.predictionLockTime).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+      : 'Match schedule start';
+
+    // Toss Result display
+    let tossResultHtml = '';
+    if (match.resultTossWinner) {
+      tossResultHtml = `
+        <div class="detail-info-item">
+          <span class="detail-info-label">Official Toss Winner</span>
+          <span class="detail-info-val" style="color: var(--accent-mint); font-weight: 700;">🏆 ${escapeHtml(match.resultTossWinner)}</span>
+        </div>
+        <div class="detail-info-item">
+          <span class="detail-info-label">Toss Decision</span>
+          <span class="detail-info-val">${match.resultDecision ? 'Elected to ' + escapeHtml(match.resultDecision) : 'Recorded'}</span>
+        </div>
+      `;
+    } else {
+      tossResultHtml = `
+        <div class="detail-info-item" style="grid-column: 1 / -1;">
+          <span class="detail-info-label">Official Toss Result</span>
+          <span class="detail-info-val" style="color: #f59e0b; font-size: 0.8rem;">
+            ⏳ Awaiting official match toss. The outcome will be finalized once the match toss result is officially recorded.
+          </span>
+        </div>
+      `;
+    }
+
+    // Ledger Transactions (if any linked)
+    let ledgerHtml = '';
+    const txs = Array.isArray(p.transactions) ? p.transactions : [];
+    if (txs.length > 0) {
+      const txRows = txs.map(t => `
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <span>${escapeHtml(t.description || t.type)} (${new Date(t.createdAt).toLocaleDateString()})</span>
+          <span style="font-weight: 700; color: ${Number(t.amount) >= 0 ? 'var(--accent-mint)' : '#fca5a5'};">
+            ${Number(t.amount) >= 0 ? '+' : ''}${Number(t.amount).toLocaleString()} Credits
+          </span>
+        </div>
+      `).join('');
+
+      ledgerHtml = `
+        <div class="detail-section">
+          <div class="detail-section-title">
+            <span>📜</span> Linked Demo Wallet Ledger Transactions
+          </div>
+          <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: var(--space-3);">
+            ${txRows}
+          </div>
+        </div>
+      `;
+    } else {
+      ledgerHtml = `
+        <div class="detail-section">
+          <div class="detail-section-title">
+            <span>🛡️</span> Demo Wallet Status
+          </div>
+          <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: var(--space-3); font-size: 0.75rem; color: var(--text-muted);">
+            Standard Platform Toss Forecast • No demonstration debit or reward linked to this record.
+          </div>
+        </div>
+      `;
+    }
+
+    content.innerHTML = `
+      <!-- Match Information -->
+      <div class="detail-section">
+        <div class="detail-section-title">
+          <span>🏏</span> Match Fixture Information
+        </div>
+        <div class="detail-info-grid">
+          <div class="detail-info-item" style="grid-column: 1 / -1;">
+            <span class="detail-info-label">Fixture</span>
+            <span class="detail-info-val" style="font-size: var(--text-md);">${safeTitle}</span>
+          </div>
+          <div class="detail-info-item">
+            <span class="detail-info-label">Tournament / Series</span>
+            <span class="detail-info-val">${safeTourn}</span>
+          </div>
+          <div class="detail-info-item">
+            <span class="detail-info-label">Match Status</span>
+            <span class="detail-info-val">${escapeHtml((match.status || 'UPCOMING').toUpperCase())}</span>
+          </div>
+          <div class="detail-info-item">
+            <span class="detail-info-label">Scheduled Date & Time</span>
+            <span class="detail-info-val">${matchDateStr}</span>
+          </div>
+          <div class="detail-info-item">
+            <span class="detail-info-label">Venue</span>
+            <span class="detail-info-val">${safeVenue}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prediction Details -->
+      <div class="detail-section">
+        <div class="detail-section-title">
+          <span>🎯</span> Your Prediction Details
+        </div>
+        <div class="detail-info-grid">
+          <div class="detail-info-item">
+            <span class="detail-info-label">Prediction Reference</span>
+            <span class="detail-info-val" style="font-family: monospace;">#PRD-${p.id}</span>
+          </div>
+          <div class="detail-info-item">
+            <span class="detail-info-label">Outcome Status</span>
+            <div>${statusBadge}</div>
+          </div>
+          <div class="detail-info-item">
+            <span class="detail-info-label">Your Toss Forecast</span>
+            <span class="detail-info-val" style="color: var(--accent-mint); font-weight: 700;">🪙 ${safePick}</span>
+          </div>
+          <div class="detail-info-item">
+            <span class="detail-info-label">Submitted At</span>
+            <span class="detail-info-val">${predCreatedStr}</span>
+          </div>
+          <div class="detail-info-item">
+            <span class="detail-info-label">Prediction Lock Time</span>
+            <span class="detail-info-val">${lockTimeStr}</span>
+          </div>
+          <div class="detail-info-item">
+            <span class="detail-info-label">Verification Rule</span>
+            <span class="detail-info-val" style="font-size: 0.75rem; color: var(--text-secondary);">
+              ${p.isVerified ? 'Outcome verified against official database match result.' : 'Pending until match toss is recorded.'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Official Toss Outcome -->
+      <div class="detail-section">
+        <div class="detail-section-title">
+          <span>🪙</span> Official Match Toss Result
+        </div>
+        <div class="detail-info-grid">
+          ${tossResultHtml}
+        </div>
+      </div>
+
+      <!-- Ledger Section -->
+      ${ledgerHtml}
+    `;
+
+    if (matchLink) {
+      matchLink.href = `../pages/match-details.html?id=${encodeURIComponent(match.id || p.matchId)}`;
+      matchLink.style.display = 'inline-flex';
+    }
+  } catch (err) {
+    console.error('Failed to load prediction details:', err);
+    content.innerHTML = `
+      <div style="padding: var(--space-6); text-align: center; color: #fca5a5;">
+        <p>⚠️ ${escapeHtml(err.message || 'Could not load prediction details.')}</p>
+        <button type="button" class="btn btn-outline btn-sm" onclick="closePredictionDetailsModal()">Close</button>
+      </div>
+    `;
+    if (matchLink) matchLink.style.display = 'none';
+  }
+}
+
+/**
+ * Closes Prediction Details modal
+ */
+function closePredictionDetailsModal() {
+  const modal = document.getElementById('predictionDetailsModal');
+  if (modal) {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+  document.body.style.overflow = '';
+}
+
+/**
+ * Initializes all Day 10 Prediction filters, search, modal listeners, and pagination controls
+ */
+function initPredictionControls() {
+  const searchInput = document.getElementById('predSearchInput');
+  const searchClear = document.getElementById('predSearchClear');
+  const statusFilter = document.getElementById('predStatusFilter');
+  const dateFilter = document.getElementById('predDateFilter');
+  const customDatesWrap = document.getElementById('predCustomDatesWrap');
+  const dateFrom = document.getElementById('predDateFrom');
+  const dateTo = document.getElementById('predDateTo');
+  const applyCustomDateBtn = document.getElementById('predApplyCustomDateBtn');
+  const sortFilter = document.getElementById('predSortFilter');
+  const resetBtn = document.getElementById('predResetFiltersBtn');
+  const refreshBtn = document.getElementById('predRefreshAllBtn');
+  const prevBtn = document.getElementById('predPrevPageBtn');
+  const nextBtn = document.getElementById('predNextPageBtn');
+  const retryBtn = document.getElementById('predRetryBtn');
+  const listContainer = document.getElementById('predictionsListContainer');
+
+  // Modal close buttons
+  const modal = document.getElementById('predictionDetailsModal');
+  const modalCloseX = document.getElementById('predModalCloseX');
+  const modalCloseBtn = document.getElementById('predModalCloseBtn');
+
+  if (modalCloseX) modalCloseX.addEventListener('click', closePredictionDetailsModal);
+  if (modalCloseBtn) modalCloseBtn.addEventListener('click', closePredictionDetailsModal);
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closePredictionDetailsModal();
+      }
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && modal.classList.contains('is-open')) {
+      closePredictionDetailsModal();
+    }
+  });
+
+  // Search input handler with debounce
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const val = e.target.value;
+      if (searchClear) searchClear.style.display = val ? 'block' : 'none';
+
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        currentPredSearch = val;
+        loadMyPredictionsHistory(1);
+      }, 350);
+    });
+
+    searchInput.addEventListener('search', () => {
+      if (!searchInput.value) {
+        if (searchClear) searchClear.style.display = 'none';
+        currentPredSearch = '';
+        loadMyPredictionsHistory(1);
+      }
+    });
+  }
+
+  if (searchClear) {
+    searchClear.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      searchClear.style.display = 'none';
+      currentPredSearch = '';
+      loadMyPredictionsHistory(1);
+    });
+  }
+
+  // Status Filter
+  if (statusFilter) {
+    statusFilter.addEventListener('change', (e) => {
+      currentPredStatus = e.target.value;
+      loadMyPredictionsHistory(1);
+    });
+  }
+
+  // Date Preset Filter
+  if (dateFilter) {
+    dateFilter.addEventListener('change', (e) => {
+      currentPredDatePreset = e.target.value;
+      if (currentPredDatePreset === 'custom') {
+        if (customDatesWrap) customDatesWrap.classList.add('is-active');
+      } else {
+        if (customDatesWrap) customDatesWrap.classList.remove('is-active');
+        currentPredDateFrom = '';
+        currentPredDateTo = '';
+        loadMyPredictionsHistory(1);
+      }
+    });
+  }
+
+  // Custom Date Apply
+  if (applyCustomDateBtn) {
+    applyCustomDateBtn.addEventListener('click', () => {
+      currentPredDateFrom = dateFrom ? dateFrom.value : '';
+      currentPredDateTo = dateTo ? dateTo.value : '';
+      loadMyPredictionsHistory(1);
+    });
+  }
+
+  // Sort Order
+  if (sortFilter) {
+    sortFilter.addEventListener('change', (e) => {
+      currentPredSort = e.target.value;
+      loadMyPredictionsHistory(1);
+    });
+  }
+
+  // Reset Filters
+  if (resetBtn) {
+    resetBtn.addEventListener('click', resetPredictionFilters);
+  }
+
+  // Refresh All Button
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      loadPredictionStatistics();
+      loadMyPredictionsHistory(currentPredPage);
+    });
+  }
+
+  // Pagination Prev / Next
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      if (currentPredPage > 1) {
+        loadMyPredictionsHistory(currentPredPage - 1);
+      }
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      if (currentPredPage < totalPredPages) {
+        loadMyPredictionsHistory(currentPredPage + 1);
+      }
+    });
+  }
+
+  // Retry Button
+  if (retryBtn) {
+    retryBtn.addEventListener('click', () => {
+      loadMyPredictionsHistory(currentPredPage);
+    });
+  }
+
+  // Event Delegation for "Details 🔍" button in cards
+  if (listContainer) {
+    listContainer.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-view-pred-details');
+      if (btn) {
+        const id = btn.getAttribute('data-pred-id');
+        if (id) openPredictionDetailsModal(id);
+      }
+    });
+  }
+}
+
 
 /**
  * Wires logout trigger

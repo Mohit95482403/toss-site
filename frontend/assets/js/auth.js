@@ -205,20 +205,39 @@ const TossArenaAuth = (function () {
           ? `<span class="badge badge-amber" style="padding: 0.15rem 0.45rem; font-size: 0.7rem;">ADMIN</span>`
           : '';
 
-        container.innerHTML = `
-          <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;">
-            <div style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2;">
-              <div style="display: flex; align-items: center; gap: 0.35rem; font-weight: 600; font-size: var(--text-sm); color: var(--text-primary);">
-                <span>${escapeHtml(user.fullName)}</span>
-                ${roleBadge}
+        const isMobile = container.classList.contains('nav-actions-mobile');
+
+        if (isMobile) {
+          container.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: var(--space-3); width: 100%;">
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--space-2) 0; border-bottom: 1px solid var(--border-subtle);">
+                <div style="display: flex; align-items: center; gap: 0.35rem; font-weight: 600; font-size: var(--text-sm); color: var(--text-primary);">
+                  <span>${escapeHtml(user.fullName)}</span>
+                  ${roleBadge}
+                </div>
+                <span style="font-size: var(--text-xs); color: var(--accent-mint); font-weight: 600;">
+                  🪙 ${formattedCredits} Credits
+                </span>
               </div>
-              <span style="font-size: var(--text-xs); color: var(--accent-mint); font-weight: 600;">
-                🪙 ${formattedCredits} Credits
-              </span>
+              <button type="button" class="btn btn-outline btn-sm logout-trigger" style="width: 100%;">Sign Out</button>
             </div>
-            <button type="button" class="btn btn-outline btn-sm logout-trigger" id="navLogoutBtn">Sign Out</button>
-          </div>
-        `;
+          `;
+        } else {
+          container.innerHTML = `
+            <div style="display: flex; align-items: center; gap: var(--space-3);">
+              <div style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2;">
+                <div style="display: flex; align-items: center; gap: 0.35rem; font-weight: 600; font-size: var(--text-sm); color: var(--text-primary);">
+                  <span>${escapeHtml(user.fullName)}</span>
+                  ${roleBadge}
+                </div>
+                <span style="font-size: var(--text-xs); color: var(--accent-mint); font-weight: 600;">
+                  🪙 ${formattedCredits} Credits
+                </span>
+              </div>
+              <button type="button" class="btn btn-outline btn-sm logout-trigger">Sign Out</button>
+            </div>
+          `;
+        }
       } else {
         // Find relative path for links depending on whether we are in /pages or root
         const isPagesDir = window.location.pathname.includes('/pages/');
@@ -491,6 +510,88 @@ const TossArenaAuth = (function () {
     return data;
   }
 
+  /**
+   * Retrieves user prediction history with filtering, searching, and pagination
+   * @param {object} params
+   * @returns {Promise<{ predictions: Array, pagination: object, filters: object }>}
+   */
+  async function getPredictions({
+    page = 1,
+    limit = 10,
+    search,
+    status,
+    dateFrom,
+    dateTo,
+    datePreset,
+    sort = 'newest'
+  } = {}) {
+    const endpoint = window.TossArenaConfig?.ENDPOINTS?.PREDICTIONS || '/predictions';
+    const url = new URL(getUrl(endpoint), window.location.origin);
+    url.searchParams.set('page', page);
+    url.searchParams.set('limit', limit);
+    if (search) url.searchParams.set('search', search);
+    if (status && status !== 'all') url.searchParams.set('status', status);
+    if (datePreset && datePreset !== 'all') url.searchParams.set('datePreset', datePreset);
+    if (dateFrom) url.searchParams.set('dateFrom', dateFrom);
+    if (dateTo) url.searchParams.set('dateTo', dateTo);
+    if (sort) url.searchParams.set('sort', sort);
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to retrieve predictions history.');
+    }
+    return {
+      predictions: data.data || [],
+      pagination: data.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 },
+      filters: data.filters || {}
+    };
+  }
+
+  /**
+   * Retrieves single prediction details by ID
+   * @param {number|string} id
+   * @returns {Promise<object>}
+   */
+  async function getPredictionDetails(id) {
+    const endpoint = `${window.TossArenaConfig?.ENDPOINTS?.PREDICTIONS || '/predictions'}/${encodeURIComponent(id)}`;
+    const response = await fetch(getUrl(endpoint), {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to retrieve prediction details.');
+    }
+    return data.data;
+  }
+
+  /**
+   * Retrieves authoritative user prediction statistics
+   * @returns {Promise<object>}
+   */
+  async function getPredictionStatistics() {
+    const endpoint = window.TossArenaConfig?.ENDPOINTS?.PREDICTIONS_STATISTICS || '/predictions/statistics';
+    const response = await fetch(getUrl(endpoint), {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to retrieve prediction statistics.');
+    }
+    return data.data;
+  }
+
   return {
     getCsrfToken,
     register,
@@ -506,7 +607,10 @@ const TossArenaAuth = (function () {
     getWalletTransactions,
     getDemoPackages,
     getClaimStatus,
-    claimDemoCredits
+    claimDemoCredits,
+    getPredictions,
+    getPredictionDetails,
+    getPredictionStatistics
   };
 })();
 

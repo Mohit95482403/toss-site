@@ -1,6 +1,7 @@
 /**
  * TossArena Prediction Controller
  * HTTP request validation, parameter extraction, and standardized responses for toss predictions.
+ * Supports Day 10 prediction history, prediction details, and performance statistics.
  */
 
 const predictionService = require('../services/predictionService');
@@ -59,22 +60,101 @@ async function submitPrediction(req, res, next) {
 }
 
 /**
- * GET /api/predictions/me
- * Retrieves current authenticated user's prediction history
+ * GET /api/predictions and GET /api/predictions/me
+ * Retrieves current authenticated user's prediction history with filters, search, sort, and pagination
  */
-async function getMyPredictions(req, res, next) {
+async function getPredictionsHistory(req, res, next) {
   try {
     const userId = req.user.id;
-    const { page, limit } = req.query;
+    const {
+      page,
+      limit,
+      search,
+      status,
+      dateFrom,
+      dateTo,
+      datePreset,
+      sort
+    } = req.query;
 
-    const result = await predictionService.getUserPredictions(userId, { page, limit });
+    const result = await predictionService.getUserPredictions(userId, {
+      page,
+      limit,
+      search,
+      status,
+      dateFrom,
+      dateTo,
+      datePreset,
+      sort
+    });
 
     return res.status(200).json({
       success: true,
       data: result.predictions,
-      pagination: result.pagination
+      pagination: result.pagination,
+      filters: result.filtersApplied
     });
   } catch (err) {
+    if (err.status) {
+      return res.status(err.status).json({
+        success: false,
+        message: err.message,
+        code: err.code || 'PREDICTION_ERROR'
+      });
+    }
+    return next(err);
+  }
+}
+
+/**
+ * GET /api/predictions/:id
+ * Retrieves details for a single prediction with match and result verification
+ */
+async function getPredictionDetails(req, res, next) {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    const prediction = await predictionService.getPredictionById(userId, id);
+
+    return res.status(200).json({
+      success: true,
+      data: prediction
+    });
+  } catch (err) {
+    if (err.status) {
+      return res.status(err.status).json({
+        success: false,
+        message: err.message,
+        code: err.code || 'PREDICTION_ERROR'
+      });
+    }
+    return next(err);
+  }
+}
+
+/**
+ * GET /api/predictions/statistics
+ * Calculates authoritative statistics for the authenticated user
+ */
+async function getPredictionStatistics(req, res, next) {
+  try {
+    const userId = req.user.id;
+
+    const stats = await predictionService.getUserPredictionStatistics(userId);
+
+    return res.status(200).json({
+      success: true,
+      data: stats
+    });
+  } catch (err) {
+    if (err.status) {
+      return res.status(err.status).json({
+        success: false,
+        message: err.message,
+        code: err.code || 'STATISTICS_ERROR'
+      });
+    }
     return next(err);
   }
 }
@@ -109,6 +189,9 @@ async function getMyPredictionForMatch(req, res, next) {
 
 module.exports = {
   submitPrediction,
-  getMyPredictions,
+  getPredictionsHistory,
+  getMyPredictions: getPredictionsHistory, // Compatible alias for Day 7 endpoint
+  getPredictionDetails,
+  getPredictionStatistics,
   getMyPredictionForMatch
 };

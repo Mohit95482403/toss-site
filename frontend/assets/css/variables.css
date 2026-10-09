@@ -93,6 +93,9 @@
   /* Z-Index */
   --z-base: 1;
   --z-sticky: 100;
-  --z-drawer: 200;
+  --z-fixed: 150;
+  --z-backdrop: 190;
+  --z-drawer: 210;
   --z-modal: 500;
 }
+

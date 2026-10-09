@@ -12,6 +12,7 @@ const { authenticate } = require('../middleware/authenticate');
 router.use(authenticate);
 
 router.get('/summary', dashboardController.getSummary);
+router.get('/statistics', dashboardController.getStatistics);
 router.get('/activity', dashboardController.getActivity);
 
 module.exports = router;
