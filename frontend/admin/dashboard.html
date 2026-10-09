@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Executive Dashboard — TossArena</title>
+  <meta name="description" content="Dedicated administrative executive dashboard for cricket toss prediction monitoring, platform metrics, and system audit logs on TossArena.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <style>
+    .admin-badge {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-full);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .admin-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.15rem;
+      margin-bottom: 2rem;
+    }
+
+    .admin-stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .admin-stat-card:hover {
+      border-color: var(--border-medium);
+      transform: translateY(-2px);
+    }
+
+    .admin-stat-label {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+
+    .admin-stat-val {
+      font-size: 2rem;
+      font-family: var(--font-display);
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.1;
+    }
+
+    .admin-stat-sub {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-top: 0.2rem;
+    }
+
+    .quick-action-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .quick-action-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .quick-action-card:hover {
+      border-color: var(--accent-mint);
+      background: rgba(25, 211, 162, 0.04);
+      transform: translateY(-2px);
+    }
+
+    .quick-action-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .quick-action-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .audit-action-badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .audit-action-match_created { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .audit-action-match_updated { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .audit-action-match_cancelled { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .audit-action-toss_result_published { background: rgba(25, 211, 162, 0.15); color: var(--accent-mint); }
+    .audit-action-toss_result_corrected { background: rgba(217, 119, 6, 0.18); color: #f59e0b; }
+
+    .toast-container {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 1100;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-width: 380px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-medium);
+      color: var(--text-primary);
+      padding: 0.85rem 1.15rem;
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      font-size: 0.875rem;
+      pointer-events: auto;
+      animation: slideInUp 0.25s ease;
+    }
+
+    @keyframes slideInUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body style="background: var(--bg-primary);">
+  <!-- Mobile Drawer Backdrop -->
+  <div class="nav-backdrop" id="dashNavBackdrop" aria-hidden="true"></div>
+
+  <div class="dash-shell">
+    <!-- Dedicated Admin Sidebar -->
+    <aside class="dash-sidebar" id="dashSidebar" aria-label="Administrator Navigation">
+      <div class="dash-sidebar-header">
+        <a href="dashboard.html" class="brand-logo" aria-label="TossArena Admin">
+          <div class="brand-icon">T</div>
+          <span>Toss<span class="highlight">Arena</span></span>
+        </a>
+        <button type="button" class="btn btn-outline btn-sm dash-mobile-toggle" id="dashSidebarClose" aria-label="Close sidebar">✕</button>
+      </div>
+
+      <div style="padding: 0.5rem 1rem 0.75rem;">
+        <span class="admin-badge">🛡️ ADMIN PORTAL</span>
+      </div>
+
+      <!-- Strictly Administrative Navigation -->
+      <nav class="dash-sidebar-nav">
+        <a href="dashboard.html" class="dash-nav-link active">
+          <span class="dash-nav-icon">📊</span>
+          <span>Admin Dashboard</span>
+        </a>
+        <a href="matches.html" class="dash-nav-link">
+          <span class="dash-nav-icon">🏏</span>
+          <span>Match Fixtures</span>
+        </a>
+        <a href="results.html" class="dash-nav-link">
+          <span class="dash-nav-icon">🏆</span>
+          <span>Toss Results</span>
+        </a>
+        <a href="audit-logs.html" class="dash-nav-link">
+          <span class="dash-nav-icon">🛡️</span>
+          <span>Audit Logs</span>
+        </a>
+        <a href="../pages/matches.html" class="dash-nav-link" target="_blank" rel="noopener">
+          <span class="dash-nav-icon">🌐</span>
+          <span>View Public Site ↗</span>
+        </a>
+      </nav>
+
+      <div class="dash-sidebar-footer">
+        <div class="dash-user-card" id="adminSidebarUserCard">
+          <div class="dash-user-avatar" id="adminUserAvatar">A</div>
+          <div class="dash-user-meta">
+            <span class="dash-user-name" id="adminUserName">Admin User</span>
+            <span class="dash-user-email" id="adminUserEmail">admin@tossarena.internal</span>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm" id="adminLogoutBtn" style="width: 100%; margin-top: 0.75rem;">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="dash-main">
+      <!-- Top Navigation Bar -->
+      <header class="dash-topbar">
+        <div class="dash-topbar-left">
+          <button type="button" class="btn btn-outline btn-sm dash-sidebar-open dash-mobile-toggle" id="dashSidebarOpen" aria-label="Open sidebar menu">
+            ☰ Menu
+          </button>
+          <div class="dash-breadcrumbs">
+            <span style="color: var(--text-muted);">Admin</span>
+            <span style="color: var(--border-medium);">/</span>
+            <span style="color: var(--text-primary); font-weight: 600;">Executive Dashboard</span>
+          </div>
+        </div>
+
+        <div class="dash-topbar-right">
+          <span class="badge badge-amber">Secure Administrative Session</span>
+          <button type="button" class="btn btn-outline btn-sm" id="btnRefreshOverview">
+            🔄 Refresh Metrics
+          </button>
+        </div>
+      </header>
+
+      <div class="dash-content-area">
+        <!-- Page Header -->
+        <div class="dash-page-header">
+          <div>
+            <h1 class="dash-page-title">Platform Administration &amp; Operations</h1>
+            <p class="dash-page-subtitle">
+              Authoritative real-time system metrics, fixture lifecycles, toss resolutions, and compliance audit log trail.
+            </p>
+          </div>
+        </div>
+
+        <!-- Executive Stat Cards Grid -->
+        <section class="admin-stats-grid" aria-label="Key Administrative Metrics">
+          <!-- Registered Users -->
+          <div class="admin-stat-card">
+            <span class="admin-stat-label">Registered Members</span>
+            <span class="admin-stat-val" id="statTotalUsers">-</span>
+            <span class="admin-stat-sub" id="statUsersBreakdown">Loading user data...</span>
+          </div>
+
+          <!-- Total Fixtures -->
+          <div class="admin-stat-card">
+            <span class="admin-stat-label">Cricket Fixtures</span>
+            <span class="admin-stat-val" id="statTotalMatches">-</span>
+            <span class="admin-stat-sub" id="statMatchesBreakdown">Loading match data...</span>
+          </div>
+
+          <!-- Awaiting Toss Result -->
+          <div class="admin-stat-card" style="border-color: rgba(245, 158, 11, 0.35);">
+            <span class="admin-stat-label">Awaiting Toss Results</span>
+            <span class="admin-stat-val" style="color: #fbbf24;" id="statAwaitingResults">-</span>
+            <span class="admin-stat-sub" id="statAwaitingSubtext">Requires match official entry</span>
+          </div>
+
+          <!-- Toss Results Published -->
+          <div class="admin-stat-card" style="border-color: rgba(25, 211, 162, 0.35);">
+            <span class="admin-stat-label">Verified Results</span>
+            <span class="admin-stat-val" style="color: var(--accent-mint);" id="statResultsPublished">-</span>
+            <span class="admin-stat-sub" id="statPublishedSubtext">Predictions evaluated</span>
+          </div>
+
+          <!-- Total Predictions Processed -->
+          <div class="admin-stat-card">
+            <span class="admin-stat-label">Predictions Submitted</span>
+            <span class="admin-stat-val" style="color: #60a5fa;" id="statTotalPreds">-</span>
+            <span class="admin-stat-sub" id="statPredsBreakdown">Loading activity...</span>
+          </div>
+        </section>
+
+        <!-- Quick Operations Hub -->
+        <section style="margin-bottom: 2rem;">
+          <h2 style="font-size: 1.15rem; font-family: var(--font-display); color: var(--text-primary); margin-bottom: 0.85rem;">
+            ⚡ Administrative Operational Hub
+          </h2>
+          <div class="quick-action-grid">
+            <a href="matches.html" class="quick-action-card">
+              <div class="quick-action-title">
+                <span>🏏</span> Match Fixtures Management
+              </div>
+              <p class="quick-action-desc">
+                Schedule upcoming cricket fixtures, manage status transitions (Open, Locked, Completed), and enforce prediction cutoffs.
+              </p>
+              <span style="font-size: 0.8rem; font-weight: 600; color: var(--accent-mint);">Manage Fixtures →</span>
+            </a>
+
+            <a href="results.html" class="quick-action-card">
+              <div class="quick-action-title">
+                <span>🏆</span> Toss Result Declaration
+              </div>
+              <p class="quick-action-desc">
+                Record official toss winners and elected decisions, preview impact with dry-runs, and publish verified results.
+              </p>
+              <span style="font-size: 0.8rem; font-weight: 600; color: #fbbf24;">Verify &amp; Publish Tosses →</span>
+            </a>
+
+            <a href="audit-logs.html" class="quick-action-card">
+              <div class="quick-action-title">
+                <span>🛡️</span> Compliance &amp; Audit Trail
+              </div>
+              <p class="quick-action-desc">
+                Inspect immutable system audit records detailing all administrative actions, timestamps, and operator IDs.
+              </p>
+              <span style="font-size: 0.8rem; font-weight: 600; color: #38bdf8;">View Audit Logs →</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- Fixtures Requiring Action Section -->
+        <section class="dash-panel" style="margin-bottom: 2rem;">
+          <div class="dash-panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 class="dash-panel-title" style="font-size: 1.1rem;">
+              ⏳ Fixtures Requiring Administrative Attention
+            </h2>
+            <a href="matches.html" style="font-size: 0.82rem; color: var(--accent-mint); text-decoration: none;">
+              View All Fixtures →
+            </a>
+          </div>
+
+          <div class="dash-table-wrap">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">ID</th>
+                  <th style="min-width: 200px;">Fixture</th>
+                  <th style="min-width: 190px;">Competition &amp; Venue</th>
+                  <th style="min-width: 170px;">Schedule</th>
+                  <th style="min-width: 110px;">Status</th>
+                  <th style="min-width: 110px;">Predictions</th>
+                  <th style="min-width: 130px; text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="urgentMatchesTableBody">
+                <tr>
+                  <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                    Loading active fixtures...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Recent Administrative Actions Audit Trail -->
+        <section class="dash-panel">
+          <div class="dash-panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 class="dash-panel-title" style="font-size: 1.1rem;">
+              🛡️ Recent Administrative Actions (Audit Trail)
+            </h2>
+            <a href="audit-logs.html" style="font-size: 0.82rem; color: #38bdf8; text-decoration: none;">
+              Full Audit Trail →
+            </a>
+          </div>
+
+          <div class="dash-table-wrap">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th style="width: 70px;">Log ID</th>
+                  <th style="min-width: 180px;">Action</th>
+                  <th style="min-width: 150px;">Operator</th>
+                  <th style="min-width: 110px;">Entity</th>
+                  <th style="min-width: 240px;">Details Summary</th>
+                  <th style="min-width: 150px; text-align: right;">Timestamp</th>
+                </tr>
+              </thead>
+              <tbody id="recentAuditsTableBody">
+                <tr>
+                  <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                    Loading audit trail...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/admin-dashboard.js"></script>
+</body>
+</html>

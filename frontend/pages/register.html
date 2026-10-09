@@ -16,13 +16,13 @@
   <!-- Header -->
   <header class="site-header">
     <div class="container navbar">
-      <a href="../index.html" class="brand-logo" aria-label="TossArena Home">
+      <a href="matches.html" class="brand-logo" aria-label="TossArena">
         <div class="brand-icon">T</div>
         <span>Toss<span class="highlight">Arena</span></span>
       </a>
       <div style="display: flex; gap: var(--space-3); align-items: center;">
         <a href="login.html" class="nav-link">Sign In</a>
-        <a href="../index.html" class="btn btn-outline btn-sm">← Back to Home</a>
+        <a href="matches.html" class="btn btn-outline btn-sm">← Back to Matches</a>
       </div>
     </div>
   </header>
@@ -204,6 +204,20 @@
         }
       }
 
+      // Check if user is already authenticated
+      (async () => {
+        try {
+          const existingUser = await window.TossArenaAuth.getCurrentUser();
+          if (existingUser) {
+            if (existingUser.role === 'admin') {
+              window.location.replace('../admin/dashboard.html');
+            } else {
+              window.location.replace('matches.html');
+            }
+          }
+        } catch (_) {}
+      })();
+
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         clearAlert();
@@ -261,12 +275,21 @@
           document.getElementById('password').value = '';
           document.getElementById('confirmPassword').value = '';
 
-          showAlert(result.message || 'Account created successfully! Redirecting to sign in...', 'success');
-
-          // Redirect to sign in page after short delay
-          setTimeout(() => {
-            window.location.href = `login.html?registered=true&email=${encodeURIComponent(email)}`;
-          }, 1500);
+          // Attempt automatic login to direct user immediately to matches
+          try {
+            submitBtn.textContent = 'Opening Matches...';
+            await window.TossArenaAuth.login({ email, password });
+            showAlert('🎉 Welcome to TossArena! Your 1,000 credits are ready. Opening matches...', 'success');
+            setTimeout(() => {
+              window.location.href = 'matches.html';
+            }, 800);
+          } catch (autoLoginErr) {
+            // Fallback: redirect to login if auto-login fails
+            showAlert(result.message || 'Account created successfully! Redirecting to sign in...', 'success');
+            setTimeout(() => {
+              window.location.href = `login.html?registered=true&email=${encodeURIComponent(email)}`;
+            }, 1200);
+          }
         } catch (err) {
           showAlert(err.message || 'Registration failed. Please check your information and try again.', 'error');
           submitBtn.disabled = false;

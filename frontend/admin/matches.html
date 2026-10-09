@@ -314,7 +314,7 @@
     <!-- Sidebar Navigation -->
     <aside class="dash-sidebar" id="dashSidebar" aria-label="Administrator Navigation">
       <div class="dash-sidebar-header">
-        <a href="../index.html" class="brand-logo" aria-label="TossArena Home">
+        <a href="dashboard.html" class="brand-logo" aria-label="TossArena Admin">
           <div class="brand-icon">T</div>
           <span>Toss<span class="highlight">Arena</span></span>
         </a>
@@ -326,21 +326,25 @@
       </div>
 
       <nav class="dash-sidebar-nav">
+        <a href="dashboard.html" class="dash-nav-link">
+          <span class="dash-nav-icon">📊</span>
+          <span>Admin Dashboard</span>
+        </a>
         <a href="matches.html" class="dash-nav-link active">
           <span class="dash-nav-icon">🏏</span>
           <span>Match Fixtures</span>
         </a>
-        <a href="../pages/matches.html" class="dash-nav-link">
+        <a href="results.html" class="dash-nav-link">
+          <span class="dash-nav-icon">🏆</span>
+          <span>Toss Results</span>
+        </a>
+        <a href="audit-logs.html" class="dash-nav-link">
+          <span class="dash-nav-icon">🛡️</span>
+          <span>Audit Logs</span>
+        </a>
+        <a href="../pages/matches.html" class="dash-nav-link" target="_blank" rel="noopener">
           <span class="dash-nav-icon">🌐</span>
-          <span>Public Matches</span>
-        </a>
-        <a href="../user/dashboard.html" class="dash-nav-link">
-          <span class="dash-nav-icon">📊</span>
-          <span>User Dashboard</span>
-        </a>
-        <a href="../user/wallet.html" class="dash-nav-link">
-          <span class="dash-nav-icon">🪙</span>
-          <span>Virtual Wallet</span>
+          <span>View Public Site ↗</span>
         </a>
       </nav>
 
@@ -394,8 +398,8 @@
               You must be authenticated with verified administrator privileges to access match scheduling and lifecycle management.
             </p>
             <div style="display: flex; gap: 0.75rem; justify-content: center;">
-              <a href="../pages/login.html" class="btn btn-primary btn-sm">Sign In as Admin</a>
-              <a href="../index.html" class="btn btn-outline btn-sm">Return Home</a>
+              <a href="login.html" class="btn btn-primary btn-sm">Sign In as Admin</a>
+              <a href="../pages/matches.html" class="btn btn-outline btn-sm">View Matches</a>
             </div>
           </div>
         </div>

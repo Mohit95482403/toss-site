@@ -23,7 +23,7 @@
   <!-- Header & Navigation Bar (Section A) -->
   <header class="site-header" id="siteHeader">
     <div class="container navbar">
-      <a href="index.html" class="brand-logo" id="brandLogo" aria-label="TossArena Home">
+      <a href="index.html" class="brand-logo" id="brandLogo" aria-label="TossArena">
         <div class="brand-icon">T</div>
         <span>Toss<span class="highlight">Arena</span></span>
       </a>
@@ -38,7 +38,6 @@
             </span>
             <button type="button" class="nav-close-btn" id="mobileNavClose" aria-label="Close menu">&times;</button>
           </li>
-          <li><a href="index.html" class="nav-link active" id="navHome">Home</a></li>
           <li><a href="pages/matches.html" class="nav-link" id="navMatches">Matches</a></li>
           <li><a href="pages/how-to-play.html" class="nav-link" id="navHowToPlay">How to Play</a></li>
           <li><a href="#featuresSection" class="nav-link" id="navFeatures">Features</a></li>
@@ -309,7 +308,6 @@
           <div class="footer-col">
             <h5>Navigation</h5>
             <ul>
-              <li><a href="index.html">Home</a></li>
               <li><a href="pages/matches.html">Matches</a></li>
               <li><a href="pages/how-to-play.html">How to Play</a></li>
               <li><a href="user/dashboard.html">User Dashboard</a></li>
@@ -347,6 +345,25 @@
   <script src="assets/js/config.js"></script>
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/main.js"></script>
+  <script>
+    // Redirect authenticated users away from landing page
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        if (window.TossArenaAuth && window.TossArenaAuth.getCurrentUser) {
+          const user = await window.TossArenaAuth.getCurrentUser();
+          if (user) {
+            if (user.role === 'admin') {
+              window.location.replace('admin/dashboard.html');
+            } else {
+              window.location.replace('pages/matches.html');
+            }
+          }
+        }
+      } catch (_) {
+        // Unauthenticated: remain on public landing page
+      }
+    });
+  </script>
 </body>
 </html>
 

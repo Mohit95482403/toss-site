@@ -32,7 +32,29 @@
   let nextPageBtnEl = null;
   let pageNumbersContainerEl = null;
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Session authorization check: Matches is the primary page for authenticated users
+    if (window.TossArenaAuth && window.TossArenaAuth.getCurrentUser) {
+      try {
+        const user = await window.TossArenaAuth.getCurrentUser(true);
+        if (!user) {
+          const isPagesDir = window.location.pathname.includes('/pages/');
+          const loginUrl = isPagesDir 
+            ? 'login.html?returnUrl=matches.html' 
+            : 'pages/login.html?returnUrl=/matches';
+          window.location.replace(loginUrl);
+          return;
+        }
+      } catch (err) {
+        const isPagesDir = window.location.pathname.includes('/pages/');
+        const loginUrl = isPagesDir 
+          ? 'login.html?returnUrl=matches.html' 
+          : 'pages/login.html?returnUrl=/matches';
+        window.location.replace(loginUrl);
+        return;
+      }
+    }
+
     initElements();
     loadTournaments();
     bindEvents();

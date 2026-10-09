@@ -12,101 +12,179 @@
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <style>
+    .admin-login-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-12) var(--space-4);
+      position: relative;
+    }
+
     .admin-login-card {
-      max-width: 440px;
+      max-width: 460px;
       width: 100%;
       background: var(--bg-surface);
-      border: 1px solid var(--border-medium);
+      border: 1px solid rgba(245, 158, 11, 0.28);
       border-radius: var(--radius-lg);
-      padding: 2.25rem 2rem;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+      padding: 2.5rem 2.25rem;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7), 0 0 35px rgba(245, 158, 11, 0.08);
+      position: relative;
+      overflow: hidden;
     }
-    .danger-callout {
-      background: rgba(239, 68, 68, 0.08);
-      border: 1px dashed rgba(239, 68, 68, 0.35);
-      border-radius: var(--radius-md);
-      padding: 0.85rem 1rem;
-      font-size: 0.85rem;
-      color: #fee2e2;
-      margin-bottom: 1.25rem;
+
+    .admin-login-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #f59e0b, #10b981, #f59e0b);
+      background-size: 200% 100%;
+      animation: shimmerBar 3s ease infinite;
+    }
+
+    @keyframes shimmerBar {
+      0% { background-position: 0% 0; }
+      50% { background-position: 100% 0; }
+      100% { background-position: 0% 0; }
+    }
+
+    .admin-auth-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(245, 158, 11, 0.14);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: var(--radius-full);
+      padding: 0.3rem 0.75rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.85rem;
+    }
+
+    .admin-submit-btn {
+      width: 100%;
+      padding: 0.85rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0b1329;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+      margin-top: var(--space-4);
+    }
+
+    .admin-submit-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .admin-submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
     }
   </style>
 </head>
 <body style="background: var(--bg-primary); display: flex; flex-direction: column; min-height: 100vh;">
   <header class="site-header">
     <div class="container navbar">
-      <a href="../index.html" class="brand-logo">
+      <a href="../index.html" class="brand-logo" aria-label="TossArena">
         <div class="brand-icon">T</div>
         <span>Toss<span class="highlight">Arena</span></span>
       </a>
-      <a href="../index.html" class="btn btn-outline btn-sm">← Back to Home</a>
+      <a href="../pages/matches.html" class="btn btn-outline btn-sm">← Back to Matches</a>
     </div>
   </header>
 
-  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 1rem;">
+  <main class="admin-login-wrapper">
     <div class="admin-login-card">
-      <div style="text-align: center; margin-bottom: 1.75rem;">
-        <span class="badge badge-amber" style="margin-bottom: 0.75rem;">🛡️ Administrator Access</span>
-        <h1 style="font-size: 1.75rem; font-family: var(--font-display); margin-bottom: 0.35rem;">
-          Control Panel
+      <div style="text-align: center; margin-bottom: 1.85rem;">
+        <span class="admin-auth-badge">🛡️ Administrator Control</span>
+        <h1 style="font-size: 1.75rem; font-family: var(--font-display); margin-bottom: 0.35rem; color: var(--text-primary);">
+          Admin Control Center
         </h1>
-        <p style="color: var(--text-secondary); font-size: 0.88rem; margin: 0;">
-          Sign in with authorized administrator credentials to manage matches.
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin: 0; line-height: 1.45;">
+          Sign in with authorized administrator credentials to manage fixtures and toss results.
         </p>
       </div>
 
-      <div id="loginErrorBox" class="danger-callout" style="display: none;"></div>
+      <div id="loginErrorBox" class="alert-banner alert-error" style="display: none; margin-bottom: 1.25rem;"></div>
 
       <form id="adminLoginForm">
-        <div class="form-group" style="margin-bottom: 1.15rem;">
-          <label for="adminEmail" style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.35rem; display: block;">
+        <!-- Email Input -->
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label for="adminEmail" class="form-label" style="display: block; margin-bottom: 0.4rem; font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);">
             Administrator Email
           </label>
-          <input
-            type="email"
-            id="adminEmail"
-            class="form-control"
-            placeholder="admin@tossarena.com"
-            required
-            autocomplete="email"
-          >
+          <div class="input-container">
+            <input
+              type="email"
+              id="adminEmail"
+              name="email"
+              class="form-input"
+              placeholder="admin@tossarena.com"
+              required
+              autocomplete="email"
+            >
+          </div>
         </div>
 
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-            <label for="adminPassword" style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); margin: 0;">
+        <!-- Password Input -->
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <label for="adminPassword" class="form-label" style="margin: 0; font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);">
               Password
             </label>
-            <button type="button" class="btn-link" data-toggle-password="adminPassword" style="font-size: 0.75rem; color: var(--accent-mint); background: none; border: none; cursor: pointer; padding: 0;">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Confidential Access</span>
+          </div>
+          <div class="input-container">
+            <input
+              type="password"
+              id="adminPassword"
+              name="password"
+              class="form-input"
+              placeholder="Enter your admin password"
+              required
+              autocomplete="current-password"
+            >
+            <button
+              type="button"
+              class="input-toggle-btn"
+              data-toggle-password="adminPassword"
+              aria-label="Toggle password visibility"
+            >
               Show
             </button>
           </div>
-          <input
-            type="password"
-            id="adminPassword"
-            class="form-control"
-            placeholder="••••••••••••"
-            required
-            autocomplete="current-password"
-          >
         </div>
 
-        <button type="submit" class="btn btn-primary btn-sm" id="btnAdminLogin" style="width: 100%; padding: 0.75rem; font-size: 0.95rem;">
-          Authenticate &amp; Enter
+        <button type="submit" class="admin-submit-btn" id="btnAdminLogin">
+          Authenticate &amp; Enter Dashboard
         </button>
       </form>
 
-      <div style="margin-top: 1.5rem; text-align: center; border-top: 1px solid var(--border-subtle); padding-top: 1.25rem;">
-        <a href="matches.html" style="font-size: 0.82rem; color: var(--accent-mint); text-decoration: none;">
-          Already signed in? Go to Matches →
-        </a>
+      <div style="margin-top: 1.75rem; text-align: center; border-top: 1px solid var(--border-subtle); padding-top: 1.25rem;">
+        <span style="font-size: 0.8rem; color: var(--text-muted);">
+          Protected administrative system. Unauthorized access attempts are monitored and recorded.
+        </span>
       </div>
     </div>
   </main>
 
-  <footer class="site-footer">
-    <div class="container footer-bottom">
-      <p>&copy; 2026 TossArena. A cricket toss prediction platform.</p>
+  <footer class="site-footer" style="padding: var(--space-6) 0;">
+    <div class="container footer-bottom" style="border-top: none; padding-top: 0;">
+      <p>&copy; <span id="currentYear">2026</span> TossArena. Strictly virtual demo credits.</p>
+      <p>Dedicated Administrative Portal</p>
     </div>
   </footer>
 
@@ -118,7 +196,7 @@
       try {
         const user = await window.TossArenaAuth.getCurrentUser();
         if (user && user.role === 'admin') {
-          window.location.href = 'matches.html';
+          window.location.replace('dashboard.html');
           return;
         }
       } catch (_) {}
@@ -127,36 +205,52 @@
       const errorBox = document.getElementById('loginErrorBox');
       const submitBtn = document.getElementById('btnAdminLogin');
 
+      function showError(msg) {
+        errorBox.textContent = msg;
+        errorBox.style.display = 'block';
+        errorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      function clearError() {
+        errorBox.textContent = '';
+        errorBox.style.display = 'none';
+      }
+
       loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        errorBox.style.display = 'none';
-        errorBox.textContent = '';
+        clearError();
 
         const email = document.getElementById('adminEmail').value.trim();
         const password = document.getElementById('adminPassword').value;
 
+        if (!email || !password) {
+          showError('Please enter both administrator email and password.');
+          return;
+        }
+
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Verifying credentials...';
+        submitBtn.textContent = 'Verifying administrative session...';
 
         try {
           const result = await window.TossArenaAuth.login({ email, password });
           const user = result.user;
 
           if (user && user.role === 'admin') {
-            window.location.href = 'matches.html';
+            submitBtn.textContent = 'Authenticated! Loading dashboard...';
+            setTimeout(() => {
+              window.location.href = 'dashboard.html';
+            }, 600);
           } else {
-            // Not an administrator
+            // Non-admin user attempted login
             await window.TossArenaAuth.logout();
-            errorBox.textContent = 'Access Denied: Your account does not have verified administrator privileges.';
-            errorBox.style.display = 'block';
+            showError('Access Denied: Your account does not have verified administrator privileges.');
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Authenticate & Enter';
+            submitBtn.textContent = 'Authenticate & Enter Dashboard';
           }
         } catch (err) {
-          errorBox.textContent = err.message || 'Login failed. Please verify credentials.';
-          errorBox.style.display = 'block';
+          showError(err.message || 'Login failed. Please verify credentials.');
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Authenticate & Enter';
+          submitBtn.textContent = 'Authenticate & Enter Dashboard';
         }
       });
     });

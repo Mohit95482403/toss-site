@@ -260,6 +260,26 @@
             <span class="detail-value">Toss Winner &amp; Decision</span>
           </div>
         </div>
+        ${match.result_toss_winner ? `
+        <div class="detail-card" style="border-color: rgba(25, 211, 162, 0.35); background: rgba(25, 211, 162, 0.05); grid-column: 1 / -1;">
+          <h2 class="detail-card-title" style="color: var(--accent-mint);">
+            <span>🏆</span> Official Verified Toss Outcome
+          </h2>
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 0.5rem;">
+            <div>
+              <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">
+                ${escapeHtml(match.result_toss_winner)} won the coin toss
+              </div>
+              <div style="font-size: 0.85rem; color: #38bdf8; margin-top: 0.25rem;">
+                Elected to ${match.result_decision === 'bat' ? 'Bat First' : 'Bowl First'}
+              </div>
+            </div>
+            <span class="badge" style="background: rgba(25, 211, 162, 0.2); color: var(--accent-mint); border: 1px solid var(--accent-mint); font-size: var(--text-xs);">
+              Admin Verified Result
+            </span>
+          </div>
+        </div>
+        ` : ''}
       </section>
 
       <!-- Day 7 Prediction Panel -->
@@ -332,18 +352,31 @@
         ? new Date(userPrediction.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
         : 'Recorded';
 
+      const predStatus = (userPrediction.status || 'pending').toLowerCase();
+      let statusBadgeHtml = `<span class="badge badge-emerald" style="font-size: 0.75rem;">✓ SUBMITTED (PENDING)</span>`;
+      let noticeMessage = '<strong>Prediction Locked:</strong> Your prediction has been secured on the platform. Under TossArena fair-play rules, each member may submit one prediction per match. Results will be evaluated upon official toss declaration.';
+
+      if (predStatus === 'correct') {
+        statusBadgeHtml = `<span class="badge" style="background: rgba(25, 211, 162, 0.2); color: var(--accent-mint); border: 1px solid var(--accent-mint); font-size: 0.75rem;">🏆 CORRECT PREDICTION</span>`;
+        noticeMessage = `<strong>Outcome Verified:</strong> Great call! Your prediction accurately forecasted the winning toss team.`;
+      } else if (predStatus === 'incorrect') {
+        statusBadgeHtml = `<span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); font-size: 0.75rem;">✕ INCORRECT PREDICTION</span>`;
+        noticeMessage = `<strong>Outcome Verified:</strong> The match referee verified a different toss winner. Keep analyzing trends for upcoming matches!`;
+      } else if (predStatus === 'cancelled' || predStatus === 'void') {
+        statusBadgeHtml = `<span class="badge badge-amber" style="font-size: 0.75rem;">✕ VOID / CANCELLED</span>`;
+        noticeMessage = `<strong>Fixture Cancelled:</strong> This match was cancelled without an official toss result.`;
+      }
+
       return `
         <section class="saved-prediction-card" aria-label="Your Submitted Prediction">
           <div class="saved-prediction-header">
             <div style="display: flex; align-items: center; gap: var(--space-2);">
               <span style="font-size: 1.25rem;">🎯</span>
               <h2 style="font-size: var(--text-base); margin: 0; font-weight: 700; color: var(--text-primary);">
-                Your Toss Prediction is Recorded
+                Your Toss Prediction Record
               </h2>
             </div>
-            <span class="badge badge-emerald" style="font-size: 0.75rem;">
-              ✓ SUBMITTED (${escapeHtml((userPrediction.status || 'pending').toUpperCase())})
-            </span>
+            ${statusBadgeHtml}
           </div>
 
           <div class="saved-prediction-pick">
@@ -358,7 +391,7 @@
           </div>
 
           <div class="prediction-notice-callout">
-            <strong>Prediction Locked:</strong> Your prediction has been secured on the platform. Under TossArena fair-play rules, each member may submit one prediction per match. Results will be evaluated upon official toss declaration.
+            ${noticeMessage}
           </div>
         </section>
       `;

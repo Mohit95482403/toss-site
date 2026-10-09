@@ -20,13 +20,13 @@
   <!-- Header -->
   <header class="site-header">
     <div class="container navbar">
-      <a href="../index.html" class="brand-logo" aria-label="TossArena Home">
+      <a href="matches.html" class="brand-logo" aria-label="TossArena">
         <div class="brand-icon">T</div>
         <span>Toss<span class="highlight">Arena</span></span>
       </a>
       <div style="display: flex; gap: var(--space-3); align-items: center;">
         <a href="register.html" class="nav-link">Create Account</a>
-        <a href="../index.html" class="btn btn-outline btn-sm">← Back to Home</a>
+        <a href="matches.html" class="btn btn-outline btn-sm">← Back to Matches</a>
       </div>
     </div>
   </header>
@@ -148,6 +148,25 @@
         showAlert('🎉 Account created! Your 1,000 credits are ready. Please sign in.', 'success');
       }
 
+      // Check if user is already authenticated
+      (async () => {
+        try {
+          const existingUser = await window.TossArenaAuth.getCurrentUser();
+          if (existingUser) {
+            if (existingUser.role === 'admin') {
+              window.location.replace('../admin/dashboard.html');
+            } else {
+              const returnUrl = urlParams.get('returnUrl');
+              if (returnUrl && !returnUrl.includes('://') && !returnUrl.includes('index.html') && returnUrl !== '/' && (!returnUrl.includes('dashboard') || returnUrl.includes('admin'))) {
+                window.location.replace(returnUrl);
+              } else {
+                window.location.replace('matches.html');
+              }
+            }
+          }
+        } catch (_) {}
+      })();
+
       // Forgot password modal/toast placeholder
       document.getElementById('forgotPasswordLink')?.addEventListener('click', (e) => {
         e.preventDefault();
@@ -182,21 +201,21 @@
         try {
           const result = await window.TossArenaAuth.login({ email, password });
 
-          showAlert(`Welcome back, ${result.user.fullName}! Redirecting...`, 'success');
+          showAlert(`Welcome back, ${result.user.fullName}! Opening matches...`, 'success');
 
           // Clean up password field
           document.getElementById('password').value = '';
 
           setTimeout(() => {
             const returnUrl = urlParams.get('returnUrl');
-            if (returnUrl && returnUrl.startsWith('../') && !returnUrl.includes('://')) {
+            if (result.user.role === 'admin') {
+              window.location.href = '../admin/dashboard.html';
+            } else if (returnUrl && !returnUrl.includes('://') && !returnUrl.includes('index.html') && returnUrl !== '/' && (!returnUrl.includes('dashboard') || returnUrl.includes('admin'))) {
               window.location.href = returnUrl;
-            } else if (result.user.role === 'admin') {
-              window.location.href = '../index.html?role=admin&auth=success';
             } else {
-              window.location.href = '../user/dashboard.html';
+              window.location.href = 'matches.html';
             }
-          }, 1000);
+          }, 800);
 
         } catch (err) {
           showAlert(err.message || 'Login failed. Please check your email and password.', 'error');

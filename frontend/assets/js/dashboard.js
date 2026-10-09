@@ -693,7 +693,9 @@ async function loadMyPredictionsHistory(page = 1) {
       // Toss Result text
       let tossResultNote = `<span style="color: var(--text-muted);">Toss: Awaiting match</span>`;
       if (p.resultTossWinner) {
-        tossResultNote = `<span style="color: var(--accent-mint); font-weight: 600;">🏆 Toss Winner: ${escapeHtml(p.resultTossWinner)}</span>`;
+        const decLabel = p.resultDecision === 'bat' ? 'Bat First' : p.resultDecision === 'bowl' ? 'Bowl First' : '';
+        const decSuffix = decLabel ? ` (${decLabel})` : '';
+        tossResultNote = `<span style="color: var(--accent-mint); font-weight: 600;">🏆 Toss Winner: ${escapeHtml(p.resultTossWinner)}${decSuffix}</span>`;
       }
 
       item.innerHTML = `

@@ -87,6 +87,30 @@ Day 1 establishes the production-grade foundation for the entire 20-day roadmap:
   - **CSRF & Authentication Security:** Session-based identity validation, account status checks (`active` only), and strict CSRF token verification on state-changing endpoints.
   - **UI Integration:** Dynamic package selection grid, confirmation modal with real-time balance calculations, one-time claim badge, and "Already Claimed" view on both `frontend/user/wallet.html` and `frontend/user/dashboard.html`.
   - **Automated Test Coverage:** 16 comprehensive unit/integration tests (`npm run test:funding`) and 10 live E2E integration tests (`npm run test:e2e:funding`), bringing total test suite to 120/120 passing (100% pass rate).
+- [x] **Day 10 Prediction History, User Statistics & Performance Dashboard:**
+  - Comprehensive user prediction history with server-side filters, search, and pagination.
+  - Authoritative user statistics calculation (`/api/predictions/statistics`) with win rate and breakdown.
+  - Prediction details modal with match metadata and pick review.
+  - Responsive charts and performance segments.
+  - 18 unit/integration tests (`npm run test:history`) passing 100%.
+- [x] **Day 11 Admin Match Management System:**
+  - **Match Fixture Controls:** Admin interface (`frontend/admin/matches.html`) for match scheduling, searching, filtering, and summary metrics.
+  - **Prediction Protection:** Prohibits renaming teams once predictions exist (`409 Conflict`), preserving user prediction integrity.
+  - **Lifecycle State Machine:** Formal transitions (`upcoming` → `open` → `locked` → `completed` / `cancelled`) with terminal state guards.
+  - **Safe Match Cancellation:** Cancels fixtures with mandatory reason while preserving all user prediction records.
+  - **Audit Trail:** Records all administrative actions into `audit_logs` table.
+  - **Automated Test Suite:** 27 comprehensive tests (`npm run test:admin`) passing 100%.
+- [x] **Day 12 Verified Toss Result Management & Prediction Outcome Updates:**
+  - **Administrative Review:** Summary metrics and paginated fixtures awaiting results via `GET /api/admin/results/overview` and `GET /api/admin/results`.
+  - **Strict Winner & Decision Validation:** Enforces canonical match team validation (`team_a` or `team_b`) and valid decision values (`bat` or `bowl`). Rejects cancelled matches.
+  - **Safe Dry-Run Preview (`POST /api/admin/results/:matchId/preview`):** Evaluates hypothetical outcomes and counts eligible predictions without mutating database state.
+  - **Atomic Transactional Publishing (`POST /api/admin/results/:matchId/publish`):** Uses MySQL row-level locking (`SELECT ... FOR UPDATE`), marks match as `completed`, records publisher ID, evaluates all predictions to `correct` or `incorrect`, and writes persistent audit log.
+  - **Idempotency & Conflict Guard:** Identical republishing returns HTTP 200 without duplicate processing; conflicting updates are rejected with HTTP 409 Conflict instructing to use the explicit correction process.
+  - **Administrative Correction Workflow (`POST /api/admin/results/:matchId/correct`):** Requires mandatory correction reason (>=5 chars), re-evaluates all prediction outcomes safely, and records previous vs updated result in `audit_logs`.
+  - **Public Result Visibility (`GET /api/matches/:id/result`):** Returns published toss winner and decision for concluded matches; hides unverified results for active or cancelled matches.
+  - **Strict Financial Invariance:** Virtual demo credits remain strictly untouched; zero wallet balance mutations or ledger entries are created during result declaration (settlements deferred to Day 14).
+  - **Admin & User Interface:** Added `frontend/admin/results.html`, `frontend/assets/js/admin-results.js`, and updated `frontend/assets/js/match-details.js` & `dashboard.js`.
+  - **Automated Test Suite:** 24 comprehensive tests in `backend/tests/admin-results.test.js` (`npm run test:results`), passing 100% (171 total automated tests passing across the entire platform).
 
 ---
 
@@ -650,7 +674,49 @@ npm test
 
 ---
 
-## 16. 20-Day Development Roadmap
+## 16. Strict Admin Panel & User Dashboard Separation
+
+TossArena enforces complete interface, route, layout, and authorization separation between the Admin Panel and User Dashboard:
+
+### 16.1 Route Namespaces & Aliasing
+- **User Dashboard Routes:**
+  - `/dashboard` $\rightarrow$ `frontend/user/dashboard.html`
+  - `/matches` $\rightarrow$ `frontend/pages/matches.html`
+  - `/matches/:id` $\rightarrow$ `frontend/pages/match-details.html`
+  - `/predictions` $\rightarrow$ `frontend/user/history.html`
+  - `/wallet` $\rightarrow$ `frontend/user/wallet.html`
+  - `/profile` $\rightarrow$ `frontend/user/dashboard.html`
+- **Admin Panel Routes:**
+  - `/admin` or `/admin/dashboard` $\rightarrow$ `frontend/admin/dashboard.html`
+  - `/admin/matches` $\rightarrow$ `frontend/admin/matches.html`
+  - `/admin/results` $\rightarrow$ `frontend/admin/results.html`
+  - `/admin/audit-logs` $\rightarrow$ `frontend/admin/audit-logs.html`
+  - `/admin/users` $\rightarrow$ `frontend/admin/users.html`
+  - `/admin/login` $\rightarrow$ `frontend/admin/login.html`
+
+### 16.2 Independent Layouts & Navigation
+- **User Interface:** Contains only user-facing components (overview stats, virtual wallet balance, upcoming predictions, my recent predictions, quick links). Zero admin sidebar links, moderation controls, or admin widgets exist in user views.
+- **Admin Interface:** Features a dedicated, isolated admin layout with its own dark theme sidebar (`Dashboard`, `Match Fixtures`, `Toss Results`, `Audit Logs`, `Public Site` external preview). Zero user wallet top-up or prediction submission forms exist in the admin panel.
+
+### 16.3 Dual-Layer Role-Based Access Control (RBAC)
+- **Backend Authorization (`authenticate` + `authorize('admin')`):** All administrative endpoints under `/api/admin/*` reject unauthenticated requests with `401 Unauthorized` and non-admin users with `403 Forbidden`. Registration strictly sanitizes role inputs to prevent client-side privilege escalation.
+- **Frontend Route Protection:** Admin pages run immediate client-side session checks via `/api/auth/me`. If the user is unauthenticated or has role `user`, they are immediately redirected to `/admin/login.html` or `/pages/login.html`.
+- **Login Redirection:**
+  - Normal users logging in at `/pages/login.html` are routed directly to `/dashboard`.
+  - Administrators logging in are routed directly to `/admin/dashboard`.
+
+### 16.4 Verification
+```bash
+# Run separation test suite (24 tests)
+npm run test:separation
+
+# Full test suite (195 tests across 11 suites)
+npm test
+```
+
+---
+
+## 17. 20-Day Development Roadmap
 
 | Day | Milestone Focus |
 | :---: | :--- |
@@ -665,7 +731,7 @@ npm test
 | **Day 9** | **Virtual Demo Credit Addition, Wallet Funding Simulation & Transaction History (Completed)** |
 | **Day 10** | **Prediction History, Prediction Details, User Statistics & Performance Dashboard (Completed)** |
 | **Day 11** | **Admin Match Management, Match Scheduling, Status Controls & Secure Backend Integration (Completed)** |
-| **Day 12** | Admin Portal Authentication, Role Verification & Admin Layout |
+| **Day 12** | **Verified Toss Result Management & Strict Admin Separation (Completed)** |
 | **Day 13** | Admin Match Management & Official Toss Result Recording Interface |
 | **Day 14** | Automated Virtual Credit Settlement Engine & Balance Payouts |
 | **Day 15** | Admin Analytics Dashboard: Prediction Volume & Win/Loss Ratios |
@@ -677,7 +743,7 @@ npm test
 
 ---
 
-## 17. License & Disclaimer
+## 18. License & Disclaimer
 
 This project is licensed under the ISC License. Strictly for demonstration and simulation purposes with 100% virtual demo credits. Real currency betting, payments, and cash redemptions are strictly prohibited.
 

@@ -42,8 +42,20 @@ const server = http.createServer((req, res) => {
       safeRel = path.join('user', 'profile.html');
     } else if (normalizedRel === 'matches') {
       safeRel = path.join('pages', 'matches.html');
+    } else if (normalizedRel === 'login' || normalizedRel === 'login.html') {
+      safeRel = path.join('pages', 'login.html');
+    } else if (normalizedRel === 'register' || normalizedRel === 'register.html') {
+      safeRel = path.join('pages', 'register.html');
+    } else if (normalizedRel === 'admin/dashboard' || normalizedRel === 'admin/dashboard.html') {
+      safeRel = path.join('admin', 'dashboard.html');
     } else if (normalizedRel === 'admin/matches' || normalizedRel === 'admin/matches.html') {
       safeRel = path.join('admin', 'matches.html');
+    } else if (normalizedRel === 'admin/results' || normalizedRel === 'admin/results.html') {
+      safeRel = path.join('admin', 'results.html');
+    } else if (normalizedRel === 'admin/audit-logs' || normalizedRel === 'admin/audit-logs.html') {
+      safeRel = path.join('admin', 'audit-logs.html');
+    } else if (normalizedRel === 'admin/users' || normalizedRel === 'admin/users.html') {
+      safeRel = path.join('admin', 'users.html');
     } else if (normalizedRel === 'admin' || normalizedRel === 'admin/login') {
       safeRel = path.join('admin', 'login.html');
     }

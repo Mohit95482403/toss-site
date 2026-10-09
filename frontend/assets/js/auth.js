@@ -148,9 +148,26 @@ const TossArenaAuth = (function () {
       currentUser = null;
       cachedCsrfToken = null;
       updateNavState(null);
-      // Redirect to home page or sign in page if currently on an authenticated page
-      if (window.location.pathname.includes('dashboard') || window.location.pathname.includes('admin')) {
-        window.location.href = '../index.html';
+      // Redirect to login page if currently on an authenticated/protected page
+      const isPagesDir = window.location.pathname.includes('/pages/');
+      const isUserDir = window.location.pathname.includes('/user/');
+      const isAdminDir = window.location.pathname.includes('/admin/');
+      const isProtected = window.location.pathname.includes('dashboard') ||
+                          window.location.pathname.includes('admin') ||
+                          window.location.pathname.includes('matches') ||
+                          window.location.pathname.includes('wallet') ||
+                          window.location.pathname.includes('history') ||
+                          window.location.pathname.includes('profile');
+      if (isProtected) {
+        if (isAdminDir) {
+          window.location.href = 'login.html';
+        } else if (isUserDir) {
+          window.location.href = '../pages/login.html';
+        } else if (isPagesDir) {
+          window.location.href = 'login.html';
+        } else {
+          window.location.href = 'pages/login.html';
+        }
       }
     }
     return true;
@@ -258,7 +275,6 @@ const TossArenaAuth = (function () {
         btn.textContent = 'Signing out...';
         btn.disabled = true;
         await logout();
-        window.location.reload();
       });
     });
   }
