@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TossArena — Premium Cricket Toss Prediction Platform (Demo Credits Only)</title>
+  <meta name="description" content="TossArena is a sports demonstration platform for cricket toss predictions using virtual demo credits exclusively. No real-money gambling.">
+  
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <!-- Site Header & Navigation -->
+  <header class="site-header" id="siteHeader">
+    <div class="container navbar">
+      <a href="index.html" class="brand-logo" id="brandLogo" aria-label="TossArena Home">
+        <div class="brand-icon">T</div>
+        <span>Toss<span class="highlight">Arena</span></span>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav aria-label="Main Navigation">
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="index.html" class="nav-link active" id="navHome">Home</a></li>
+          <li><a href="pages/matches.html" class="nav-link" id="navMatches">Matches</a></li>
+          <li><a href="pages/how-to-play.html" class="nav-link" id="navHowToPlay">How to Play</a></li>
+          <li><a href="user/dashboard.html" class="nav-link" id="navDashboard">User Dashboard</a></li>
+          <li><a href="admin/login.html" class="nav-link" id="navAdmin">Admin</a></li>
+        </ul>
+      </nav>
+
+      <!-- Navigation Actions -->
+      <div class="nav-actions">
+        <a href="pages/login.html" class="btn btn-outline btn-sm" id="navLoginBtn">Login</a>
+        <a href="pages/register.html" class="btn btn-primary btn-sm" id="navRegisterBtn">Register</a>
+      </div>
+
+      <!-- Mobile Menu Toggle Button -->
+      <button class="mobile-toggle" id="mobileNavToggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navMenu">
+        ☰
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main id="mainContent">
+    <!-- Hero Section -->
+    <section class="hero-section" id="heroSection">
+      <div class="hero-glow-bg" aria-hidden="true"></div>
+      <div class="container hero-content">
+        <!-- Status Badges -->
+        <div style="display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+          <span class="badge badge-dev" id="devStatusBadge">
+            <span class="badge-pill-dot"></span> Day 1 Foundation Active
+          </span>
+          <span class="badge badge-emerald" id="virtualCreditsBadge">
+            100% Virtual Demo Credits Only
+          </span>
+        </div>
+
+        <h1 class="hero-title" id="mainHeroTitle">
+          The Next-Generation <br>
+          <span class="gradient-text">Cricket Toss Arena</span>
+        </h1>
+
+        <p class="hero-subtitle" id="heroSubtitle">
+          Experience the thrill of cricket match toss strategy without financial risk. 
+          Analyze team captains, pitch conditions, and coin-flip probabilities using virtual demo credits.
+        </p>
+
+        <!-- Mandatory Strict Scope Notice -->
+        <div class="disclaimer-banner" id="disclaimerBanner">
+          <div class="disclaimer-icon">⚠️</div>
+          <div class="disclaimer-text">
+            <strong>Demonstration Platform Notice:</strong> TossArena is strictly an educational simulation using virtual demo credits. No real-money gambling, payment gateways, cashouts, or monetary redemptions are supported.
+          </div>
+        </div>
+
+        <!-- Call to Action Buttons -->
+        <div class="hero-actions" id="heroActions">
+          <a href="pages/matches.html" class="btn btn-primary btn-lg" id="exploreMatchesBtn">
+            Explore Matches <span style="font-size: 0.8em; opacity: 0.9;">(Preview)</span>
+          </a>
+          <a href="pages/login.html" class="btn btn-secondary btn-lg" id="loginBtn">
+            Sign In / Register
+          </a>
+          <a href="pages/how-to-play.html" class="btn btn-outline btn-lg" id="howToPlayBtn">
+            How It Works
+          </a>
+        </div>
+
+        <!-- Backend Health Status Card -->
+        <div class="status-card" id="apiStatusCard">
+          <div class="status-header">
+            <span class="status-title">Backend API Bridge</span>
+            <div class="status-ping">
+              <span class="ping-indicator" id="statusIndicator"></span>
+              <span id="statusText">Checking connection...</span>
+            </div>
+            <button class="btn btn-outline btn-sm" id="retryHealthBtn" style="padding: 4px 10px; font-size: 11px;">
+              Ping API
+            </button>
+          </div>
+          <pre class="status-details" id="statusDetails">Connecting to TossArena API...</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Platform Modules Section -->
+    <section class="features-section" id="featuresSection">
+      <div class="container">
+        <div class="section-header">
+          <span class="badge badge-info">Architecture Overview</span>
+          <h2 class="section-title">Core Platform Modules</h2>
+          <p>TossArena is structured across robust modular components being rolled out over the 20-day roadmap.</p>
+        </div>
+
+        <div class="grid-3" id="featuresGrid">
+          <!-- Card 1 -->
+          <div class="feature-card">
+            <div class="feature-icon-wrapper">🏏</div>
+            <h3 class="feature-title">Match Toss Engine</h3>
+            <p class="feature-desc">Browse scheduled international and league cricket matches with automated lock-in countdowns prior to the coin flip.</p>
+            <span class="feature-status-tag">Phase: Day 4-6</span>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="feature-card">
+            <div class="feature-icon-wrapper">💰</div>
+            <h3 class="feature-title">Virtual Credit Wallet</h3>
+            <p class="feature-desc">Every registered user receives 1,000 complimentary demo credits with simulated top-up and audit-trail transaction ledger.</p>
+            <span class="feature-status-tag">Phase: Day 7-9</span>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="feature-card">
+            <div class="feature-icon-wrapper">🛡️</div>
+            <h3 class="feature-title">Admin Management</h3>
+            <p class="feature-desc">Comprehensive administrative portal to create matches, declare official coin toss results, and trigger automated virtual settlements.</p>
+            <span class="feature-status-tag">Phase: Day 12-15</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer" id="siteFooter">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <div class="brand-logo" style="margin-bottom: 0.75rem;">
+            <div class="brand-icon">T</div>
+            <span>Toss<span class="highlight">Arena</span></span>
+          </div>
+          <p style="font-size: 0.85rem; line-height: 1.6;">
+            The premier virtual-credit cricket coin toss prediction platform. Built for entertainment, statistics, and cricket enthusiasts worldwide.
+          </p>
+        </div>
+
+        <div class="footer-links-group">
+          <div class="footer-col">
+            <h5>Navigation</h5>
+            <ul>
+              <li><a href="index.html">Home</a></li>
+              <li><a href="pages/matches.html">Matches</a></li>
+              <li><a href="pages/how-to-play.html">How to Play</a></li>
+              <li><a href="user/dashboard.html">User Dashboard</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Administration</h5>
+            <ul>
+              <li><a href="admin/login.html">Admin Portal</a></li>
+              <li><a href="pages/login.html">User Login</a></li>
+              <li><a href="pages/register.html">Register Account</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h5>Compliance</h5>
+            <ul>
+              <li><span style="color: var(--text-muted);">Virtual Credits Only</span></li>
+              <li><span style="color: var(--text-muted);">No Real Currency</span></li>
+              <li><span style="color: var(--text-muted);">18+ Recommended</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 TossArena. All rights reserved. Strictly a virtual-credit simulation platform.</p>
+        <p>Day 1: Project Initialization &amp; Backend Foundation</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

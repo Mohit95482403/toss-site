@@ -1,0 +1,26 @@
+{
+  "name": "tossarena-backend",
+  "version": "1.0.0",
+  "description": "TossArena Backend API - Virtual-credit cricket toss prediction platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node tests/health.test.js"
+  },
+  "keywords": [
+    "cricket",
+    "toss-prediction",
+    "virtual-credits",
+    "express",
+    "api"
+  ],
+  "author": "TossArena Engineering Team",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0"
+  }
+}

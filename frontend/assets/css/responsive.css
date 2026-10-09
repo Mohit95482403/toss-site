@@ -1,0 +1,111 @@
+/* ==========================================================================
+   TossArena - Responsive Breakpoints & Adaptations
+   ========================================================================== */
+
+/* Tablet & Smaller (< 1024px) */
+@media (max-width: 1024px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-links-group {
+    gap: var(--space-8);
+  }
+}
+
+/* Mobile & Small Tablets (< 768px) */
+@media (max-width: 768px) {
+  :root {
+    --navbar-height: 64px;
+  }
+
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .mobile-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-menu {
+    position: absolute;
+    top: var(--navbar-height);
+    left: 0;
+    right: 0;
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-subtle);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--space-4) var(--space-6);
+    gap: var(--space-3);
+    display: none;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .nav-menu.is-active {
+    display: flex;
+  }
+
+  .nav-link {
+    width: 100%;
+    padding: var(--space-2) 0;
+  }
+
+  .nav-actions {
+    display: none; /* Embedded or secondary in mobile view */
+  }
+
+  .hero-section {
+    padding: var(--space-10) 0 var(--space-8) 0;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+  }
+
+  .disclaimer-banner {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-2);
+  }
+
+  .footer-content {
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .footer-links-group {
+    flex-direction: column;
+    gap: var(--space-6);
+    width: 100%;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-2);
+  }
+}
+
+/* Extra Small Devices (< 480px) */
+@media (max-width: 480px) {
+  .container {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+
+  .card {
+    padding: var(--space-4);
+  }
+
+  .hero-title {
+    font-size: 1.85rem;
+  }
+}
