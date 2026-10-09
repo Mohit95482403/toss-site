@@ -199,13 +199,16 @@
           document.getElementById('password').value = '';
 
           setTimeout(() => {
-            // Role-based routing: admin or regular user
-            if (result.user.role === 'admin') {
+            const returnUrl = urlParams.get('returnUrl');
+            if (returnUrl && returnUrl.startsWith('../') && !returnUrl.includes('://')) {
+              window.location.href = returnUrl;
+            } else if (result.user.role === 'admin') {
               window.location.href = '../index.html?role=admin&auth=success';
             } else {
-              window.location.href = '../index.html?auth=success';
+              window.location.href = '../user/dashboard.html';
             }
           }, 1000);
+
         } catch (err) {
           showAlert(err.message || 'Login failed. Please check your email and password.', 'error');
           submitBtn.disabled = false;

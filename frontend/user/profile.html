@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile & Settings — TossArena (Virtual Demo Platform)</title>
+  <meta name="description" content="Manage your TossArena account profile and display settings.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body style="background: var(--bg-primary);">
+  <!-- Mobile Drawer Backdrop -->
+  <div class="nav-backdrop" id="dashNavBackdrop" aria-hidden="true"></div>
+
+  <div class="dash-shell">
+    <!-- Sidebar Navigation -->
+    <aside class="dash-sidebar" id="dashSidebar" aria-label="Dashboard Navigation">
+      <div class="dash-sidebar-header">
+        <a href="../index.html" class="brand-logo" aria-label="TossArena Home">
+          <div class="brand-icon">T</div>
+          <span>Toss<span class="highlight">Arena</span></span>
+        </a>
+        <button type="button" class="btn btn-outline btn-sm dash-mobile-toggle" id="dashSidebarClose" aria-label="Close sidebar">✕</button>
+      </div>
+
+      <nav class="dash-sidebar-nav">
+        <a href="dashboard.html" class="dash-nav-link">
+          <span class="dash-nav-icon">📊</span>
+          <span>Overview</span>
+        </a>
+        <a href="../pages/matches.html" class="dash-nav-link">
+          <span class="dash-nav-icon">🏏</span>
+          <span>Matches</span>
+        </a>
+        <a href="#" class="dash-nav-link" style="opacity: 0.65; cursor: not-allowed;">
+          <span class="dash-nav-icon">🎯</span>
+          <span>My Predictions</span>
+          <span class="dash-nav-badge">Soon</span>
+        </a>
+        <a href="#" class="dash-nav-link" style="opacity: 0.65; cursor: not-allowed;">
+          <span class="dash-nav-icon">🪙</span>
+          <span>Demo Wallet</span>
+          <span class="dash-nav-badge">Soon</span>
+        </a>
+        <a href="#" class="dash-nav-link" style="opacity: 0.65; cursor: not-allowed;">
+          <span class="dash-nav-icon">📜</span>
+          <span>Transactions</span>
+          <span class="dash-nav-badge">Soon</span>
+        </a>
+        <a href="#" class="dash-nav-link" style="opacity: 0.65; cursor: not-allowed;">
+          <span class="dash-nav-icon">🔔</span>
+          <span>Notifications</span>
+          <span class="dash-nav-badge">Soon</span>
+        </a>
+        <a href="profile.html" class="dash-nav-link active">
+          <span class="dash-nav-icon">⚙️</span>
+          <span>Profile &amp; Settings</span>
+        </a>
+        <a href="../pages/how-to-play.html" class="dash-nav-link">
+          <span class="dash-nav-icon">💡</span>
+          <span>How to Play</span>
+        </a>
+      </nav>
+
+      <div class="dash-sidebar-footer">
+        <button type="button" class="btn btn-outline btn-sm dash-logout-btn" style="width: 100%;">
+          🚪 Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Dashboard Content -->
+    <div class="dash-content">
+      <!-- Top Navigation Bar -->
+      <header class="dash-topbar">
+        <div class="dash-topbar-left">
+          <button type="button" class="dash-mobile-toggle" id="dashMobileToggle" aria-label="Open sidebar">☰</button>
+          <div>
+            <h2 style="font-size: var(--text-md); font-weight: 700; margin: 0;">Profile &amp; Account Settings</h2>
+          </div>
+        </div>
+
+        <div class="dash-user-menu">
+          <div class="dash-avatar" id="userAvatar" title="Your Profile">U</div>
+          <div class="dash-user-info" style="display: none; @media(min-width:600px){display:flex;}">
+            <span class="dash-user-name" id="userName">Loading...</span>
+            <span class="dash-user-role" id="userRole">Standard Member</span>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm dash-logout-btn" style="margin-left: var(--space-2);">
+            Sign Out
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Body Container -->
+      <main class="dash-body">
+        <div class="profile-card">
+          <div class="profile-avatar-row">
+            <div class="profile-big-avatar" id="profileBigAvatar">U</div>
+            <div class="profile-meta-details">
+              <h1 style="font-size: var(--text-xl); font-weight: 700; margin: 0;">Profile Management</h1>
+              <p style="font-size: var(--text-xs); color: var(--text-secondary); margin: 0;">
+                Update your display name. Security details and roles are strictly managed by the server.
+              </p>
+              <div style="display: flex; gap: var(--space-2); margin-top: var(--space-2);">
+                <span class="badge badge-emerald" id="profileStatusBadge">ACTIVE</span>
+                <span class="badge badge-amber" id="profileRoleBadge">USER</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alert Box for Profile Feedback -->
+          <div id="profileAlert" class="alert-banner" role="alert" aria-live="polite"></div>
+
+          <form id="profileForm" novalidate>
+            <div class="form-group" style="margin-bottom: var(--space-4);">
+              <label for="profileFullName" class="form-label">Full Name</label>
+              <input
+                type="text"
+                id="profileFullName"
+                name="fullName"
+                class="form-input"
+                placeholder="Your full name"
+                required
+                minlength="2"
+                maxlength="100"
+              >
+              <span class="form-helper">This is the display name shown across your TossArena account.</span>
+            </div>
+
+            <div class="profile-grid-fields" style="margin-bottom: var(--space-4);">
+              <div class="form-group">
+                <label for="profileEmail" class="form-label">Email Address (Read-Only)</label>
+                <input
+                  type="email"
+                  id="profileEmail"
+                  class="form-input"
+                  readonly
+                  style="opacity: 0.7; cursor: not-allowed; background: var(--bg-surface);"
+                >
+                <span class="form-helper">Registered primary account address.</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Account Joined</label>
+                <div class="form-input" id="profileMemberSince" style="opacity: 0.7; background: var(--bg-surface);">
+                  Loading...
+                </div>
+                <span class="form-helper">UTC registration timestamp.</span>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: var(--space-6);">
+              <label class="form-label">Last Active Session</label>
+              <div class="form-input" id="profileLastLogin" style="opacity: 0.7; background: var(--bg-surface);">
+                Loading...
+              </div>
+            </div>
+
+            <div style="display: flex; gap: var(--space-3); justify-content: flex-end;">
+              <a href="dashboard.html" class="btn btn-outline btn-sm">
+                ← Back to Overview
+              </a>
+              <button type="button" class="btn btn-outline btn-sm" id="profileCancelBtn">
+                Reset
+              </button>
+              <button type="submit" class="btn btn-primary btn-sm" id="profileSaveBtn">
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
+
+      <!-- Dashboard Footer -->
+      <footer class="site-footer" style="padding: var(--space-6) 0; margin-top: auto;">
+        <div class="container footer-bottom" style="border-top: none; padding-top: 0;">
+          <p>&copy; <span id="currentYear">2026</span> TossArena. Strictly a virtual-credit simulation platform.</p>
+          <p>Day 5: User Dashboard &amp; Profile</p>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/dashboard.js"></script>
+</body>
+</html>

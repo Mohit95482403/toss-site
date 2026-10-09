@@ -279,16 +279,99 @@ const TossArenaAuth = (function () {
       .replace(/'/g, '&#39;');
   }
 
+  /**
+   * Fetches dashboard summary statistics for the authenticated user
+   * @returns {Promise<object>}
+   */
+  async function getDashboardSummary() {
+    const endpoint = window.TossArenaConfig?.ENDPOINTS?.DASHBOARD_SUMMARY || '/dashboard/summary';
+    const response = await fetch(getUrl(endpoint), {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      credentials: 'include'
+    });
+
+    if (response.status === 401) {
+      throw new Error('UNAUTHORIZED');
+    }
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to load dashboard summary.');
+    }
+    return data.data;
+  }
+
+  /**
+   * Fetches recent activity stream for the authenticated user
+   * @returns {Promise<Array>}
+   */
+  async function getDashboardActivity() {
+    const endpoint = window.TossArenaConfig?.ENDPOINTS?.DASHBOARD_ACTIVITY || '/dashboard/activity';
+    const response = await fetch(getUrl(endpoint), {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      credentials: 'include'
+    });
+
+    if (response.status === 401) {
+      throw new Error('UNAUTHORIZED');
+    }
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to load dashboard activity.');
+    }
+    return data.data?.activities || [];
+  }
+
+  /**
+   * Updates user profile (full name)
+   * @param {{ fullName: string }} payload
+   * @returns {Promise<object>}
+   */
+  async function updateProfile(payload) {
+    const token = await getCsrfToken();
+    const endpoint = window.TossArenaConfig?.ENDPOINTS?.USER_PROFILE || '/users/me';
+
+    const response = await fetch(getUrl(endpoint), {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-Token': token
+      },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      if (response.status === 403 && data.code === 'EBADCSRFTOKEN') {
+        cachedCsrfToken = null;
+      }
+      throw new Error(data.message || 'Failed to update profile.');
+    }
+
+    currentUser = data.user;
+    updateNavState(currentUser);
+    return data;
+  }
+
   return {
     getCsrfToken,
     register,
     login,
     logout,
     getCurrentUser,
+    getDashboardSummary,
+    getDashboardActivity,
+    updateProfile,
     updateNavState,
     initPasswordToggles
   };
 })();
+
 
 window.TossArenaAuth = TossArenaAuth;
 

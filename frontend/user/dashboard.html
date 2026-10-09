@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Dashboard — TossArena (Demo Credits Platform)</title>
-  <meta name="description" content="TossArena User Dashboard for viewing virtual credit wallet balance, predictions, and simulated transactions.">
+  <title>User Dashboard — TossArena (Virtual Demo Platform)</title>
+  <meta name="description" content="View your virtual demo credit balance, match predictions, recent activity, and profile on TossArena. Strictly virtual demo credits.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
@@ -12,47 +12,278 @@
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
 </head>
-<body>
-  <header class="site-header">
-    <div class="container navbar">
-      <a href="../index.html" class="brand-logo">
-        <div class="brand-icon">T</div>
-        <span>Toss<span class="highlight">Arena</span></span>
-      </a>
-      <a href="../index.html" class="btn btn-outline btn-sm">← Back to Home</a>
-    </div>
-  </header>
+<body style="background: var(--bg-primary);">
+  <!-- Mobile Drawer Backdrop -->
+  <div class="nav-backdrop" id="dashNavBackdrop" aria-hidden="true"></div>
 
-  <main style="flex: 1; padding: 3rem 1rem;">
-    <div class="container" style="max-width: 800px; text-align: center;">
-      <span class="badge badge-dev" style="margin-bottom: 1rem;">Under Construction • Planned Day 7</span>
-      <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">User Dashboard</h1>
-      <p style="margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
-        The user dashboard module with demo credit wallet balance, prediction history, and simulated deposit/withdrawal workflows is scheduled for Days 7–10.
-      </p>
-
-      <div class="card" style="text-align: left; background: var(--bg-card); border: 1px dashed var(--border-card);">
-        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--accent-emerald-light);">
-          Planned Dashboard Components:
-        </h3>
-        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem; color: var(--text-secondary);">
-          <li>💳 <strong>Demo Credit Wallet:</strong> Real-time balance display (starting at 1,000 demo credits).</li>
-          <li>📜 <strong>Transaction Ledger:</strong> Simulated top-ups, prediction stakes, payouts, and audit trail.</li>
-          <li>🎯 <strong>Active Predictions:</strong> Pending coin toss forecasts with live lock timers.</li>
-          <li>📈 <strong>Win/Loss Statistics:</strong> Accuracy rate, total simulated profit, and favorite cricket teams.</li>
-        </ul>
+  <div class="dash-shell">
+    <!-- Sidebar Navigation -->
+    <aside class="dash-sidebar" id="dashSidebar" aria-label="Dashboard Navigation">
+      <div class="dash-sidebar-header">
+        <a href="../index.html" class="brand-logo" aria-label="TossArena Home">
+          <div class="brand-icon">T</div>
+          <span>Toss<span class="highlight">Arena</span></span>
+        </a>
+        <button type="button" class="btn btn-outline btn-sm dash-mobile-toggle" id="dashSidebarClose" aria-label="Close sidebar">✕</button>
       </div>
 
-      <div style="margin-top: 2rem;">
-        <a href="../index.html" class="btn btn-primary btn-sm">Return to Home</a>
-      </div>
-    </div>
-  </main>
+      <nav class="dash-sidebar-nav">
+        <a href="#" class="dash-nav-link active" data-dash-section="overview">
+          <span class="dash-nav-icon">📊</span>
+          <span>Overview</span>
+        </a>
+        <a href="../pages/matches.html" class="dash-nav-link">
+          <span class="dash-nav-icon">🏏</span>
+          <span>Matches</span>
+        </a>
+        <a href="#" class="dash-nav-link" style="opacity: 0.65; cursor: not-allowed;" title="Scheduled for Day 8">
+          <span class="dash-nav-icon">🎯</span>
+          <span>My Predictions</span>
+          <span class="dash-nav-badge">Soon</span>
+        </a>
+        <a href="#" class="dash-nav-link" style="opacity: 0.65; cursor: not-allowed;" title="Scheduled for Day 9">
+          <span class="dash-nav-icon">🪙</span>
+          <span>Demo Wallet</span>
+          <span class="dash-nav-badge">Soon</span>
+        </a>
+        <a href="#" class="dash-nav-link" style="opacity: 0.65; cursor: not-allowed;" title="Scheduled for Day 10">
+          <span class="dash-nav-icon">📜</span>
+          <span>Transactions</span>
+          <span class="dash-nav-badge">Soon</span>
+        </a>
+        <a href="#" class="dash-nav-link" style="opacity: 0.65; cursor: not-allowed;" title="Scheduled for Day 11">
+          <span class="dash-nav-icon">🔔</span>
+          <span>Notifications</span>
+          <span class="dash-nav-badge">Soon</span>
+        </a>
+        <a href="#" class="dash-nav-link" data-dash-section="profile">
+          <span class="dash-nav-icon">⚙️</span>
+          <span>Profile &amp; Settings</span>
+        </a>
+        <a href="../pages/how-to-play.html" class="dash-nav-link">
+          <span class="dash-nav-icon">💡</span>
+          <span>How to Play</span>
+        </a>
+      </nav>
 
-  <footer class="site-footer">
-    <div class="container footer-bottom">
-      <p>&copy; 2026 TossArena. Strictly a virtual-credit simulation platform.</p>
+      <div class="dash-sidebar-footer">
+        <button type="button" class="btn btn-outline btn-sm dash-logout-btn" style="width: 100%;">
+          🚪 Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Dashboard Content -->
+    <div class="dash-content">
+      <!-- Top Navigation Bar -->
+      <header class="dash-topbar">
+        <div class="dash-topbar-left">
+          <button type="button" class="dash-mobile-toggle" id="dashMobileToggle" aria-label="Open sidebar">☰</button>
+          <div>
+            <h2 id="dashPageTitle" style="font-size: var(--text-md); font-weight: 700; margin: 0;">Dashboard Overview</h2>
+          </div>
+        </div>
+
+        <div class="dash-user-menu">
+          <div class="dash-avatar" id="userAvatar" title="Your Profile">U</div>
+          <div class="dash-user-info" style="display: none; @media(min-width:600px){display:flex;}">
+            <span class="dash-user-name" id="userName">Loading...</span>
+            <span class="dash-user-role" id="userRole">Standard Member</span>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm dash-logout-btn" style="margin-left: var(--space-2);" title="Sign out of TossArena">
+            Sign Out
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Body Container -->
+      <main class="dash-body">
+
+        <!-- SECTION 1: OVERVIEW -->
+        <div id="sectionOverview" style="display: flex; flex-direction: column; gap: var(--space-6);">
+          <!-- Welcome Hero Banner -->
+          <div class="dash-welcome-hero">
+            <div class="dash-welcome-text">
+              <h1>Welcome back, <span id="welcomeFirstName" style="color: var(--accent-mint);">Member</span>!</h1>
+              <p>Your TossArena experience, all in one place. Strictly virtual demo credits.</p>
+            </div>
+            <div class="dash-welcome-actions">
+              <a href="../pages/matches.html" class="btn btn-primary btn-sm">Explore Matches</a>
+              <a href="../pages/how-to-play.html" class="btn btn-outline btn-sm">How to Play</a>
+            </div>
+          </div>
+
+          <!-- Account Summary Cards (4 Cards) -->
+          <section class="summary-grid" aria-label="Account Summary Statistics">
+            <!-- 1. Account Status -->
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <span class="stat-card-label">Account Status</span>
+                <span class="stat-card-icon">🛡️</span>
+              </div>
+              <div class="stat-card-value" id="statAccountStatus">Loading...</div>
+              <div class="stat-card-subtext">Verified server identity</div>
+            </div>
+
+            <!-- 2. Predictions Made -->
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <span class="stat-card-label">Predictions Made</span>
+                <span class="stat-card-icon">🎯</span>
+              </div>
+              <div class="stat-card-value" id="statPredictionsMade">0</div>
+              <div class="stat-card-subtext">Coin toss forecasts</div>
+            </div>
+
+            <!-- 3. Completed Predictions -->
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <span class="stat-card-label">Completed Predictions</span>
+                <span class="stat-card-icon">📈</span>
+              </div>
+              <div class="stat-card-value" id="statCompletedPredictions">0</div>
+              <div class="stat-card-subtext">Settled results</div>
+            </div>
+
+            <!-- 4. Demo Credit Balance -->
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <span class="stat-card-label">Demo Credit Balance</span>
+                <span class="stat-card-icon">🪙</span>
+              </div>
+              <div class="stat-card-value" id="statDemoBalance" style="color: var(--accent-mint);">Loading...</div>
+              <div class="stat-card-subtext" style="color: var(--accent-gold);">100% Virtual • No Cash Value</div>
+            </div>
+          </section>
+
+          <!-- 2-Column Split: Recent Activity & Upcoming Matches -->
+          <div class="dash-columns">
+            <!-- Left Column: Recent Activity Timeline -->
+            <section class="dash-panel" aria-label="Recent Activity">
+              <div class="dash-panel-header">
+                <div class="dash-panel-title">
+                  <span>📜</span> Recent Activity
+                </div>
+                <span style="font-size: var(--text-xs); color: var(--text-muted);">Real Ledger Records</span>
+              </div>
+              <div class="activity-list" id="activityContainer">
+                <div style="padding: var(--space-4); text-align: center; color: var(--text-muted); font-size: var(--text-xs);">
+                  Loading activity timeline...
+                </div>
+              </div>
+            </section>
+
+            <!-- Right Column: Upcoming Matches Preview -->
+            <section class="dash-panel" aria-label="Upcoming Matches Preview">
+              <div class="dash-panel-header">
+                <div class="dash-panel-title">
+                  <span>🏏</span> Upcoming Matches
+                </div>
+                <a href="../pages/matches.html" style="font-size: var(--text-xs); color: var(--accent-mint); font-weight: 600; text-decoration: none;">
+                  View All Fixtures →
+                </a>
+              </div>
+              <div class="activity-list" id="matchesPreviewContainer">
+                <div style="padding: var(--space-4); text-align: center; color: var(--text-muted); font-size: var(--text-xs);">
+                  Loading match fixtures...
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- SECTION 2: PROFILE & SETTINGS (Toggleable) -->
+        <div id="sectionProfile" style="display: none;">
+          <div class="profile-card">
+            <div class="profile-avatar-row">
+              <div class="profile-big-avatar" id="profileBigAvatar">U</div>
+              <div class="profile-meta-details">
+                <h2 style="font-size: var(--text-xl); font-weight: 700; margin: 0;">Profile Management</h2>
+                <p style="font-size: var(--text-xs); color: var(--text-secondary); margin: 0;">
+                  Update your display name. Security details and roles are strictly managed by the server.
+                </p>
+                <div style="display: flex; gap: var(--space-2); margin-top: var(--space-2);">
+                  <span class="badge badge-emerald" id="profileStatusBadge">ACTIVE</span>
+                  <span class="badge badge-amber" id="profileRoleBadge">USER</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Alert Box for Profile Feedback -->
+            <div id="profileAlert" class="alert-banner" role="alert" aria-live="polite"></div>
+
+            <form id="profileForm" novalidate>
+              <div class="form-group" style="margin-bottom: var(--space-4);">
+                <label for="profileFullName" class="form-label">Full Name</label>
+                <input
+                  type="text"
+                  id="profileFullName"
+                  name="fullName"
+                  class="form-input"
+                  placeholder="Your full name"
+                  required
+                  minlength="2"
+                  maxlength="100"
+                >
+                <span class="form-helper">This is the display name shown on your TossArena account.</span>
+              </div>
+
+              <div class="profile-grid-fields" style="margin-bottom: var(--space-4);">
+                <div class="form-group">
+                  <label for="profileEmail" class="form-label">Email Address (Read-Only)</label>
+                  <input
+                    type="email"
+                    id="profileEmail"
+                    class="form-input"
+                    readonly
+                    style="opacity: 0.7; cursor: not-allowed; background: var(--bg-surface);"
+                  >
+                  <span class="form-helper">Registered primary account address.</span>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Account Joined</label>
+                  <div class="form-input" id="profileMemberSince" style="opacity: 0.7; background: var(--bg-surface);">
+                    Loading...
+                  </div>
+                  <span class="form-helper">UTC registration timestamp.</span>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: var(--space-6);">
+                <label class="form-label">Last Active Session</label>
+                <div class="form-input" id="profileLastLogin" style="opacity: 0.7; background: var(--bg-surface);">
+                  Loading...
+                </div>
+              </div>
+
+              <div style="display: flex; gap: var(--space-3); justify-content: flex-end;">
+                <button type="button" class="btn btn-outline btn-sm" id="profileCancelBtn">
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-primary btn-sm" id="profileSaveBtn">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </main>
+
+      <!-- Dashboard Footer -->
+      <footer class="site-footer" style="padding: var(--space-6) 0; margin-top: auto;">
+        <div class="container footer-bottom" style="border-top: none; padding-top: 0;">
+          <p>&copy; <span id="currentYear">2026</span> TossArena. Strictly a virtual-credit simulation platform.</p>
+          <p>Day 5: User Dashboard &amp; Profile</p>
+        </div>
+      </footer>
     </div>
-  </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/dashboard.js"></script>
 </body>
 </html>

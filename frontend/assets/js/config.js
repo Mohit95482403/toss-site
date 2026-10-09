@@ -13,7 +13,7 @@ const TossArenaConfig = (function () {
     API_ORIGIN,
     API_BASE_URL: `${API_ORIGIN}/api`,
     APP_NAME: 'TossArena',
-    APP_VERSION: '1.0.0 (Day 4 Authentication)',
+    APP_VERSION: '1.0.0 (Day 5 User Dashboard)',
     ENDPOINTS: {
       HEALTH: '/health',
       HEALTH_DB: '/health/db',
@@ -23,8 +23,12 @@ const TossArenaConfig = (function () {
       AUTH_REGISTER: '/auth/register',
       AUTH_LOGIN: '/auth/login',
       AUTH_LOGOUT: '/auth/logout',
-      AUTH_ME: '/auth/me'
+      AUTH_ME: '/auth/me',
+      DASHBOARD_SUMMARY: '/dashboard/summary',
+      DASHBOARD_ACTIVITY: '/dashboard/activity',
+      USER_PROFILE: '/users/me'
     },
+
 
     /**
      * Resolves an API path to a fully qualified URL

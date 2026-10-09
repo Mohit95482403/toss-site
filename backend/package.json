@@ -8,9 +8,10 @@
     "dev": "node --watch server.js",
     "test": "node tests/health.test.js",
     "test:db": "node scripts/test-db.js",
-    "test:auth": "node tests/auth.test.js"
-
+    "test:auth": "node tests/auth.test.js",
+    "test:dashboard": "node tests/dashboard.test.js"
   },
+
   "keywords": [
     "cricket",
     "toss-prediction",

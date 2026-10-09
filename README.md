@@ -68,8 +68,15 @@ Day 1 establishes the production-grade foundation for the entire 20-day roadmap:
 - [x] **Day 4 CSRF & Origin Security:** Session-bound cryptographic CSRF protection (`GET /api/auth/csrf`), timing-safe verification on state-changing requests, and strict origin validation.
 - [x] **Day 4 Rate Limiting:** Brute-force and spam protection on `/api/auth/login` (10/15min) and `/api/auth/register` (10/1hr).
 - [x] **Day 4 Role-Based Access Control (RBAC):** Server-authoritative `authenticate` and `authorize('admin')` middleware; public registration cannot grant admin roles.
-- [x] **Day 4 Frontend Auth Integration:** Real registration (`register.html`) and login (`login.html`) forms with live validation, show/hide password toggles, prefill handling, and dynamic navbar state displaying username and demo credits across pages (`auth.js`).
 - [x] **Day 4 Automated Test Suite (`npm run test:auth`):** 23 automated tests verifying all security rules, edge cases, RBAC, and regressions with 100% pass rate.
+- [x] **Day 5 User Dashboard Layout (`frontend/user/dashboard.html`):** Premium sports-tech dashboard with sticky collapsible sidebar, top navigation bar, welcome hero banner, dynamic greeting, and accessible mobile drawer.
+- [x] **Day 5 Account Summary Cards:** 4 real database-backed summary cards displaying verified Account Status, Predictions Made count, Completed Predictions count, and Demo Credit Balance (`1,000.00 Credits` virtual credits, no fake currency).
+- [x] **Day 5 Live Activity Stream (`GET /api/dashboard/activity`):** Real database activity timeline integrating virtual credit grants, prediction stakes, and notifications with localized date/time formatting.
+- [x] **Day 5 Upcoming Matches Preview (`GET /api/matches`):** Real database match fixture feed with tournament name, teams, scheduled dates, and status badges.
+- [x] **Day 5 Self-Service Profile Management (`frontend/user/profile.html` & `PATCH /api/users/me`):** Displays read-only email, role, status, registration date, and allows updating display name with server-side validation, CSRF verification, and mass-assignment protection.
+- [x] **Day 5 Session Security & Logout:** Secure authenticated route guards, user isolation defense (User A cannot access or update User B's records), and session destruction upon logout.
+- [x] **Day 5 Automated Test Suite (`npm run test:dashboard`):** 13 automated tests covering summary statistics, activity feeds, user isolation, profile updates, mass assignment defense, and logout session invalidation with 100% pass rate.
+
 
 
 ---
