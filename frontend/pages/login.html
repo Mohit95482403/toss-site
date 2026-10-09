@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In — TossArena (Virtual Demo Platform)</title>
-  <meta name="description" content="Sign in to TossArena to manage your virtual demo credit wallet and view cricket toss predictions.">
+  <title>Sign In — TossArena</title>
+  <meta name="description" content="Sign in to TossArena to manage your wallet and view cricket toss predictions.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
 </head>
+
 <body>
   <!-- Header -->
   <header class="site-header">
@@ -28,7 +32,8 @@
   </header>
 
   <!-- Main Content -->
-  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: var(--space-8) var(--space-4);">
+  <main
+    style="flex: 1; display: flex; align-items: center; justify-content: center; padding: var(--space-8) var(--space-4);">
     <div class="auth-wrapper">
       <div class="auth-header">
         <span class="badge badge-emerald" style="margin-bottom: var(--space-3);">
@@ -36,7 +41,7 @@
         </span>
         <h1 class="auth-title">Welcome Back</h1>
         <p class="auth-subtitle">
-          Sign in to manage your virtual demo credits and match toss predictions.
+          Sign in to manage your credits and match toss predictions.
         </p>
       </div>
 
@@ -48,16 +53,8 @@
         <!-- Email Address -->
         <div class="form-group">
           <label for="email" class="form-label">Email Address</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            class="form-input"
-            placeholder="you@example.com"
-            required
-            autocomplete="email"
-            autofocus
-          >
+          <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required
+            autocomplete="email" autofocus>
           <span class="form-error" id="emailError"></span>
         </div>
 
@@ -65,26 +62,16 @@
         <div class="form-group">
           <div class="form-label">
             <span>Password</span>
-            <a href="#" id="forgotPasswordLink" style="text-transform: none; font-size: var(--text-xs); color: var(--accent-mint); font-weight: 500;">
+            <a href="#" id="forgotPasswordLink"
+              style="text-transform: none; font-size: var(--text-xs); color: var(--accent-mint); font-weight: 500;">
               Forgot password?
             </a>
           </div>
           <div class="input-container">
-            <input
-              type="password"
-              id="password"
-              name="password"
-              class="form-input"
-              placeholder="Enter your password"
-              required
-              autocomplete="current-password"
-            >
-            <button
-              type="button"
-              class="input-toggle-btn"
-              data-toggle-password="password"
-              aria-label="Toggle password visibility"
-            >
+            <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password"
+              required autocomplete="current-password">
+            <button type="button" class="input-toggle-btn" data-toggle-password="password"
+              aria-label="Toggle password visibility">
               Show
             </button>
           </div>
@@ -97,9 +84,11 @@
         </button>
 
         <!-- Create Account Prompt -->
-        <div style="text-align: center; margin-top: var(--space-2); font-size: var(--text-xs); color: var(--text-secondary);">
+        <div
+          style="text-align: center; margin-top: var(--space-2); font-size: var(--text-xs); color: var(--text-secondary);">
           Don't have an account yet?
-          <a href="register.html" style="color: var(--accent-mint); font-weight: 600;">Create one here (1,000 free credits)</a>
+          <a href="register.html" style="color: var(--accent-mint); font-weight: 600;">Create one here (1,000 free
+            credits)</a>
         </div>
       </form>
     </div>
@@ -108,7 +97,7 @@
   <!-- Footer -->
   <footer class="site-footer" style="padding: var(--space-6) 0;">
     <div class="container footer-bottom" style="border-top: none; padding-top: 0;">
-      <p>&copy; <span id="currentYear">2026</span> TossArena. Strictly a virtual-credit simulation platform.</p>
+      <p>&copy; <span id="currentYear">2026</span> TossArena. A cricket toss prediction platform.</p>
       <p>Secure Session Authentication (Day 4)</p>
     </div>
   </footer>
@@ -156,7 +145,7 @@
         if (registeredEmail) {
           emailInput.value = registeredEmail;
         }
-        showAlert('🎉 Account created! Your 1,000 complimentary demo credits are ready. Please sign in.', 'success');
+        showAlert('🎉 Account created! Your 1,000 credits are ready. Please sign in.', 'success');
       }
 
       // Forgot password modal/toast placeholder
@@ -218,4 +207,5 @@
     });
   </script>
 </body>
+
 </html>

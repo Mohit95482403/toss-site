@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Demo Wallet &amp; Ledger — TossArena (Virtual Demo Platform)</title>
-  <meta name="description" content="Review and manage your virtual demo credit balance and immutable transaction ledger on TossArena. 100% demo credits, strictly non-monetary.">
+  <title>My Wallet &amp; Ledger — TossArena</title>
+  <meta name="description" content="Review and manage your credit balance and immutable transaction ledger on TossArena.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
@@ -40,9 +40,9 @@
           <span class="dash-nav-icon">🎯</span>
           <span>My Predictions</span>
         </a>
-        <a href="wallet.html" class="dash-nav-link active" data-dash-section="wallet" title="My Virtual Demo Wallet">
+        <a href="wallet.html" class="dash-nav-link active" data-dash-section="wallet" title="My Wallet">
           <span class="dash-nav-icon">🪙</span>
-          <span>Demo Wallet</span>
+          <span>Wallet</span>
         </a>
         <a href="wallet.html" class="dash-nav-link" data-dash-section="wallet" title="Transaction Ledger">
           <span class="dash-nav-icon">📜</span>
@@ -77,7 +77,7 @@
         <div class="dash-topbar-left">
           <button type="button" class="dash-mobile-toggle" id="dashMobileToggle" aria-label="Open sidebar">☰</button>
           <div>
-            <h2 id="dashPageTitle" style="font-size: var(--text-md); font-weight: 700; margin: 0;">My Demo Wallet</h2>
+            <h2 id="dashPageTitle" style="font-size: var(--text-md); font-weight: 700; margin: 0;">My Wallet</h2>
           </div>
         </div>
 
@@ -99,8 +99,8 @@
           <!-- Wallet Page Header -->
           <div class="dash-welcome-hero" style="background: linear-gradient(135deg, rgba(20, 24, 33, 0.95), rgba(15, 23, 42, 0.9));">
             <div class="dash-welcome-text">
-              <h1>My Demo Wallet</h1>
-              <p>Manage and review your virtual demo credits. Demo credits have no cash value and cannot be withdrawn or redeemed.</p>
+              <h1>My Wallet</h1>
+              <p>Manage and review your credits. Credits have no cash value and cannot be withdrawn or redeemed.</p>
             </div>
             <div class="dash-welcome-actions">
               <a href="../pages/matches.html" class="btn btn-primary btn-sm">Explore Matches →</a>
@@ -112,11 +112,11 @@
           <div class="wallet-hero-card">
             <div class="wallet-hero-info">
               <div class="wallet-badge-virtual">
-                <span>🛡️</span> 100% Virtual Demo Platform
+                <span>🛡️</span> Platform Credits • Secure Ledger
               </div>
               <div class="wallet-balance-display">
                 <span class="wallet-balance-amount" id="walletBalanceAmount">---.--</span>
-                <span class="wallet-balance-unit">Demo Credits</span>
+                <span class="wallet-balance-unit">Credits</span>
               </div>
               <div class="wallet-hero-meta">
                 <span id="walletLastUpdatedText">Last updated: Checking...</span>
@@ -126,7 +126,7 @@
             </div>
             <div class="wallet-hero-actions">
               <a href="#sectionClaimPackages" class="btn btn-primary btn-sm" id="btnScrollToClaim">
-                + Add Demo Credits
+                + Add Credits
               </a>
               <button type="button" class="btn btn-outline btn-sm" id="walletRefreshBalanceBtn">
                 ↻ Refresh Balance
@@ -138,19 +138,19 @@
           <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--radius-md); padding: var(--space-4) var(--space-5); display: flex; align-items: flex-start; gap: var(--space-3);">
             <span style="font-size: 1.25rem;">⚠️</span>
             <div style="font-size: var(--text-xs); color: var(--text-secondary); line-height: 1.5;">
-              <strong style="color: #fbbf24;">Strict Virtual Policy:</strong> This wallet operates exclusively with demonstration units. Real-money deposits, cash betting, payment gateway integrations, and monetary withdrawals are strictly prohibited and non-existent on TossArena.
+              <strong style="color: #fbbf24;">Platform Credit Policy:</strong> This wallet operates exclusively with platform credits. Real-money deposits, cash betting, payment gateway integrations, and monetary withdrawals are strictly prohibited and non-existent on TossArena.
             </div>
           </div>
 
-          <!-- SECTION: DEMO PACKAGES & FUNDING SIMULATION (Day 9) -->
-          <section class="dash-panel" id="sectionClaimPackages" aria-label="Simulated Demo Credit Packages">
+          <!-- SECTION: CREDIT PACKAGES & FUNDING (Day 9) -->
+          <section class="dash-panel" id="sectionClaimPackages" aria-label="Credit Packages">
             <div class="dash-panel-header" style="flex-wrap: wrap; gap: var(--space-3);">
               <div>
                 <div class="dash-panel-title">
-                  <span>🪙</span> Add Demo Credits (Simulation)
+                  <span>🪙</span> Add Credits
                 </div>
                 <div style="font-size: var(--text-xs); color: var(--text-muted); margin-top: 0.25rem;">
-                  Demo credits are for platform testing and entertainment only. They have no monetary value and cannot be withdrawn, transferred, or exchanged for cash.
+                  Credits are for platform testing and entertainment only. They have no monetary value and cannot be withdrawn, transferred, or exchanged for cash.
                 </div>
               </div>
               <span class="badge badge-amber" id="packageClaimBadge" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;">
@@ -170,10 +170,10 @@
             <div class="package-claimed-card" id="sectionAlreadyClaimed" style="display: none;">
               <div class="package-claimed-info">
                 <div class="package-claimed-title">
-                  <span>✅</span> One-Time Demo Package Claimed
+                  <span>✅</span> One-Time Package Claimed
                 </div>
                 <div class="package-claimed-details" id="claimedPackageDetailsText">
-                  You have already claimed your one-time virtual demo credit allocation.
+                  You have already claimed your one-time credit allocation.
                 </div>
               </div>
               <a href="#walletTxTable" class="btn btn-outline btn-sm">
@@ -199,10 +199,10 @@
                 <label for="walletTypeFilter" style="font-size: var(--text-xs); color: var(--text-muted); font-weight: 600;">Type:</label>
                 <select id="walletTypeFilter" class="ledger-filter-select" aria-label="Filter transactions by type">
                   <option value="">All Transactions</option>
-                  <option value="demo_grant">Demo Grants</option>
+                  <option value="demo_grant">Credit Grants</option>
                   <option value="prediction_debit">Prediction Debits</option>
                   <option value="prediction_refund">Prediction Refunds</option>
-                  <option value="demo_adjustment">Demo Adjustments</option>
+                  <option value="demo_adjustment">Credit Adjustments</option>
                   <option value="demo_result_credit">Result Credits</option>
                 </select>
 
@@ -250,7 +250,7 @@
                 No transactions yet
               </h3>
               <p style="font-size: var(--text-sm); color: var(--text-muted); max-width: 420px; margin: 0 auto;">
-                Your virtual wallet activity will appear here when a supported demo-credit operation occurs.
+                Your wallet activity will appear here when an account credit operation occurs.
               </p>
             </div>
 
@@ -285,12 +285,12 @@
           </section>
         </div>
 
-        <!-- Modal: Confirm Simulated Demo Credit Claim (Day 9) -->
+        <!-- Modal: Confirm Credit Allocation (Day 9) -->
         <div class="claim-modal-backdrop" id="claimConfirmModal" role="dialog" aria-modal="true" aria-labelledby="claimModalTitle">
           <div class="claim-modal-box">
             <div class="modal-header">
               <h3 id="claimModalTitle" style="font-size: var(--text-lg); font-weight: 700; color: var(--text-primary); margin: 0;">
-                Confirm Simulated Allocation
+                Confirm Credit Allocation
               </h3>
               <button type="button" class="btn btn-outline btn-sm modal-close-btn" id="btnCancelClaimX" aria-label="Close modal">✕</button>
             </div>
@@ -299,7 +299,7 @@
               <div style="background: rgba(25, 211, 162, 0.08); border: 1px solid rgba(25, 211, 162, 0.25); border-radius: var(--radius-md); padding: var(--space-4);">
                 <div style="font-size: var(--text-xs); color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Selected Package</div>
                 <div style="font-size: var(--text-lg); font-weight: 800; color: var(--accent-mint);" id="modalPackageName">Standard Package</div>
-                <div style="font-size: var(--text-sm); font-weight: 700; color: var(--text-primary); margin-top: 2px;" id="modalCreditsAmount">+1,000 Demo Credits</div>
+                <div style="font-size: var(--text-sm); font-weight: 700; color: var(--text-primary); margin-top: 2px;" id="modalCreditsAmount">+1,000 Credits</div>
               </div>
 
               <div style="display: flex; justify-content: space-between; font-size: var(--text-xs); color: var(--text-secondary); padding: 0 var(--space-2);">
@@ -312,7 +312,7 @@
               </div>
 
               <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--radius-sm); padding: var(--space-3); font-size: 0.75rem; color: var(--text-muted); line-height: 1.45;">
-                🛡️ <strong>Simulation Notice:</strong> Demo credits are purely virtual tokens for testing toss forecasts. No real money, payment gateways, or cash conversions exist on TossArena.
+                🛡️ <strong>Platform Notice:</strong> Credits are for toss forecasts only. No real money, payment gateways, or cash conversions exist on TossArena.
               </div>
 
               <div id="modalClaimAlert" class="alert-banner" style="display: none;" role="alert"></div>
@@ -334,8 +334,8 @@
       <!-- Dashboard Footer -->
       <footer class="site-footer" style="padding: var(--space-6) 0; margin-top: auto;">
         <div class="container footer-bottom" style="border-top: none; padding-top: 0;">
-          <p>&copy; <span id="currentYear">2026</span> TossArena. Strictly a virtual-credit simulation platform.</p>
-          <p>Day 8: Demo Wallet &amp; Transaction Ledger</p>
+          <p>&copy; <span id="currentYear">2026</span> TossArena. Cricket Toss Prediction Platform.</p>
+          <p>TossArena Wallet &amp; Transaction Ledger</p>
         </div>
       </footer>
     </div>

@@ -390,7 +390,7 @@ function initDashboardNavigation() {
       loadMyPredictionsHistory();
     } else if (section === 'wallet') {
       if (walletSection) walletSection.style.display = 'flex';
-      if (pageTitle) pageTitle.textContent = 'My Demo Wallet';
+      if (pageTitle) pageTitle.textContent = 'My Wallet';
       walletLinks.forEach((l) => l.classList.add('active'));
       loadWalletBalance();
       loadWalletTransactions(1);
@@ -674,13 +674,13 @@ async function loadWalletTransactions(page = 1) {
         : 'Recorded';
 
       let badgeClass = 'tx-badge-grant';
-      let badgeLabel = 'Demo Grant';
+      let badgeLabel = 'Credit Grant';
       let isCredit = true;
 
       switch (tx.transactionType) {
         case 'demo_grant':
           badgeClass = 'tx-badge-grant';
-          badgeLabel = 'Demo Grant';
+          badgeLabel = 'Credit Grant';
           isCredit = true;
           break;
         case 'prediction_debit':
@@ -695,7 +695,7 @@ async function loadWalletTransactions(page = 1) {
           break;
         case 'demo_adjustment':
           badgeClass = 'tx-badge-adjustment';
-          badgeLabel = 'Demo Adjustment';
+          badgeLabel = 'Credit Adjustment';
           isCredit = true;
           break;
         case 'demo_result_credit':
@@ -733,7 +733,7 @@ async function loadWalletTransactions(page = 1) {
         <td>
           <span class="tx-badge ${badgeClass}">${badgeLabel}</span>
         </td>
-        <td style="color: var(--text-primary); font-weight: 500;">${escapeHtml(tx.description || 'Virtual demo credit ledger entry')}</td>
+        <td style="color: var(--text-primary); font-weight: 500;">${escapeHtml(tx.description || 'Credit ledger entry')}</td>
         <td style="font-size: var(--text-xs); color: var(--text-muted);">${refText}</td>
         <td class="${amountClass}">
           ${amountSign}${formattedAmount} <span style="font-size: 0.75rem; font-weight: 600;">Credits</span>
@@ -867,7 +867,7 @@ async function loadDemoPackages() {
             : 'earlier';
           const pkgName = userClaim.claimedPackageName || userClaim.claimedPackageId || 'Initial';
           const creditsStr = Number(userClaim.claimedCredits || 0).toLocaleString();
-          claimedDetailsText.innerHTML = `You claimed the <strong>${escapeHtml(pkgName)}</strong> package (+${creditsStr} demo credits) on ${dateStr}. Per platform rules, demo credit grants are strictly one-time per user account.`;
+          claimedDetailsText.innerHTML = `You claimed the <strong>${escapeHtml(pkgName)}</strong> package (+${creditsStr} credits) on ${dateStr}. Per platform rules, credit grants are strictly one-time per user account.`;
         }
       }
       if (badgeEl) {
@@ -900,22 +900,22 @@ async function loadDemoPackages() {
             <h4 class="package-name">${escapeHtml(pkg.name)}</h4>
             <div class="package-credits">
               ${creditsFormatted}
-              <span class="package-credits-unit">Demo Credits</span>
+              <span class="package-credits-unit">Credits</span>
             </div>
-            <div class="package-desc">${escapeHtml(pkg.description || 'Virtual demo credit allocation')}</div>
+            <div class="package-desc">${escapeHtml(pkg.description || 'Platform credit allocation')}</div>
           </div>
           <div class="package-features">
             <div class="package-feature-item">
               <span class="package-feature-icon">🛡️</span>
-              <span>100% Virtual • No Cash Value</span>
+              <span>Platform Credits • No Cash Value</span>
             </div>
             <div class="package-feature-item">
               <span class="package-feature-icon">⚡</span>
-              <span>Instant Simulated Allocation</span>
+              <span>Instant Allocation</span>
             </div>
             <div class="package-feature-item">
               <span class="package-feature-icon">🎯</span>
-              <span>For Toss Forecast Testing Only</span>
+              <span>For Toss Predictions Only</span>
             </div>
           </div>
           <button type="button" class="btn btn-primary btn-sm btn-select-package" style="width: 100%; margin-top: auto;" data-package-id="${escapeHtml(pkg.id)}" data-package-name="${escapeHtml(pkg.name)}" data-package-credits="${pkg.demoCredits}">
@@ -941,7 +941,7 @@ async function loadDemoPackages() {
     if (container) {
       container.innerHTML = `
         <div style="grid-column: 1 / -1; padding: var(--space-6); text-align: center; color: #fca5a5; font-size: var(--text-xs);">
-          ⚠️ Unable to load available demo packages. Please verify server connection and refresh.
+          ⚠️ Unable to load available packages. Please verify server connection and refresh.
         </div>
       `;
     }
@@ -982,7 +982,7 @@ function openClaimModal(pkg) {
   const expected = cleanBalance + (pkg.demoCredits || 0);
 
   if (pkgNameEl) pkgNameEl.textContent = `${pkg.name} Package`;
-  if (creditsAmountEl) creditsAmountEl.textContent = `+${Number(pkg.demoCredits || 0).toLocaleString()} Demo Credits`;
+  if (creditsAmountEl) creditsAmountEl.textContent = `+${Number(pkg.demoCredits || 0).toLocaleString()} Credits`;
   if (currentBalanceEl) currentBalanceEl.textContent = `${cleanBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Credits`;
   if (expectedBalanceEl) expectedBalanceEl.textContent = `${expected.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Credits`;
 
@@ -1030,7 +1030,7 @@ function initDemoPackageControls() {
       if (!selectedDemoPackage) return;
 
       confirmBtn.disabled = true;
-      confirmBtn.innerHTML = '<span>⏳ Processing Simulated Allocation...</span>';
+      confirmBtn.innerHTML = '<span>⏳ Processing Allocation...</span>';
 
       if (alertEl) {
         alertEl.style.display = 'none';
@@ -1053,11 +1053,11 @@ function initDemoPackageControls() {
         await loadDemoPackages();
 
         // Show feedback alert/notification
-        alert(`✅ Success: ${result.message || 'Simulated demo credits have been successfully allocated to your wallet!'}`);
+        alert(`✅ Success: ${result.message || 'Credits have been successfully allocated to your wallet!'}`);
       } catch (err) {
-        console.error('Claim demo credits error:', err);
+        console.error('Claim credits error:', err);
         if (alertEl) {
-          alertEl.textContent = err.message || 'Failed to claim demo credits.';
+          alertEl.textContent = err.message || 'Failed to claim credits.';
           alertEl.className = 'alert-banner alert-banner-error';
           alertEl.style.display = 'block';
         }

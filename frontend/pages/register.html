@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Account — TossArena (Virtual Demo Platform)</title>
-  <meta name="description" content="Register an account on TossArena to receive 1,000 complimentary virtual demo credits for cricket coin toss predictions.">
+  <title>Create Account — TossArena</title>
+  <meta name="description" content="Register an account on TossArena to receive 1,000 complimentary credits for cricket coin toss predictions.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
@@ -32,7 +32,7 @@
     <div class="auth-wrapper">
       <div class="auth-header">
         <span class="badge badge-emerald" style="margin-bottom: var(--space-3);">
-          🪙 1,000 Demo Credits On Registration
+          🪙 1,000 Credits On Registration
         </span>
         <h1 class="auth-title">Create Account</h1>
         <p class="auth-subtitle">
@@ -141,7 +141,7 @@
           <label class="form-checkbox-label">
             <input type="checkbox" id="termsCheck" class="form-checkbox" required>
             <span>
-              I understand that TossArena uses <strong>strictly virtual demo credits</strong>. No real currency is accepted, deposited, or paid out.
+              I understand that TossArena uses <strong>platform credits exclusively</strong>. No real currency is accepted, deposited, or paid out.
             </span>
           </label>
           <span class="form-error" id="termsError"></span>
@@ -164,7 +164,7 @@
   <!-- Footer -->
   <footer class="site-footer" style="padding: var(--space-6) 0;">
     <div class="container footer-bottom" style="border-top: none; padding-top: 0;">
-      <p>&copy; <span id="currentYear">2026</span> TossArena. Strictly a virtual-credit simulation platform.</p>
+      <p>&copy; <span id="currentYear">2026</span> TossArena. A cricket toss prediction platform.</p>
       <p>Secure Session Authentication (Day 4)</p>
     </div>
   </footer>
@@ -239,7 +239,7 @@
         }
 
         if (!termsAccepted) {
-          setFieldError('terms', 'Please acknowledge the virtual-credit terms.');
+          setFieldError('terms', 'Please acknowledge the platform terms.');
           hasError = true;
         }
 

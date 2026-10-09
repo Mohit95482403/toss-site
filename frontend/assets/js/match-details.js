@@ -299,12 +299,12 @@
                 <span style="font-weight: 800; color: var(--accent-mint);" id="modalSelectedTeamName">—</span>
               </div>
               <div class="confirm-row">
-                <span style="color: var(--text-muted);">Virtual Demo Stake:</span>
-                <span style="font-weight: 600; color: var(--text-secondary);">Demo Platform Entry (Day 7)</span>
+                <span style="color: var(--text-muted);">Platform Stake:</span>
+                <span style="font-weight: 600; color: var(--text-secondary);">Standard Entry</span>
               </div>
             </div>
             <div class="prediction-notice-callout">
-              🪙 <strong>Virtual Demo Credits Only:</strong> No real currency or monetary payout.
+              🪙 <strong>Platform Credits Only:</strong> No real currency or monetary payout.
             </div>
           </div>
           <div class="modal-actions">
@@ -376,14 +376,14 @@
             <span class="badge badge-emerald">Open for Predictions</span>
           </div>
           <p class="prediction-status-desc">
-            This match is open for virtual coin toss forecasting. Sign in to your TossArena account to select your predicted toss winner using virtual demo credits.
+            This match is open for coin toss forecasting. Sign in to your TossArena account to select your predicted toss winner using platform credits.
           </p>
           <div style="display: flex; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-4);">
             <a href="login.html?redirect=${currentUrl}" class="btn btn-primary btn-sm">
               Sign In to Predict
             </a>
             <a href="register.html" class="btn btn-outline btn-sm">
-              Create Free Account (1,000 Demo Credits)
+              Create Free Account (1,000 Credits)
             </a>
           </div>
         </section>
@@ -457,7 +457,7 @@
           </div>
 
           <div class="prediction-notice-callout" style="margin-top: var(--space-5);">
-            <strong>Demo Platform Rule:</strong> One submission per member per match. Submissions cannot be modified once confirmed.
+            <strong>Platform Rule:</strong> One submission per member per match. Submissions cannot be modified once confirmed.
           </div>
         </section>
       `;
@@ -495,7 +495,7 @@
         </div>
         <p class="prediction-status-desc">${desc}</p>
         <div class="prediction-notice-callout">
-          <strong>100% Virtual Demo Credits Only:</strong> No real money or monetary payouts.
+          <strong>Platform Credits Only:</strong> No real money or monetary payouts.
         </div>
       </section>
     `;

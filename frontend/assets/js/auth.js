@@ -213,7 +213,7 @@ const TossArenaAuth = (function () {
                 ${roleBadge}
               </div>
               <span style="font-size: var(--text-xs); color: var(--accent-mint); font-weight: 600;">
-                🪙 ${formattedCredits} Demo Credits
+                🪙 ${formattedCredits} Credits
               </span>
             </div>
             <button type="button" class="btn btn-outline btn-sm logout-trigger" id="navLogoutBtn">Sign Out</button>
@@ -372,7 +372,7 @@ const TossArenaAuth = (function () {
 
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to retrieve demo wallet balance.');
+      throw new Error(data.message || 'Failed to retrieve wallet balance.');
     }
     return data.data;
   }
@@ -424,7 +424,7 @@ const TossArenaAuth = (function () {
 
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to retrieve demo credit packages.');
+      throw new Error(data.message || 'Failed to retrieve credit packages.');
     }
     return {
       packages: data.data || [],
@@ -482,7 +482,7 @@ const TossArenaAuth = (function () {
       if (response.status === 403 && data.code === 'EBADCSRFTOKEN') {
         cachedCsrfToken = null;
       }
-      const err = new Error(data.message || 'Failed to claim demo credits.');
+      const err = new Error(data.message || 'Failed to claim credits.');
       err.code = data.code;
       err.data = data.data;
       throw err;
