@@ -29,6 +29,7 @@ async function initUserDashboard() {
   initDashboardNavigation();
   initDashboardLogout();
   initProfileForm();
+  initWalletControls();
 
   // 3. Load live backend data
   loadDashboardSummary();
@@ -357,25 +358,43 @@ function initDashboardNavigation() {
     }
   });
 
-  // Section switcher between Dashboard and Profile
+  // Section switcher between Dashboard Overview, My Predictions, Profile, and Wallet
   const overviewLinks = document.querySelectorAll('[data-dash-section="overview"]');
+  const predictionsLinks = document.querySelectorAll('[data-dash-section="predictions"]');
   const profileLinks = document.querySelectorAll('[data-dash-section="profile"]');
+  const walletLinks = document.querySelectorAll('[data-dash-section="wallet"]');
   const overviewSection = document.getElementById('sectionOverview');
+  const predictionsSection = document.getElementById('sectionPredictions');
   const profileSection = document.getElementById('sectionProfile');
+  const walletSection = document.getElementById('sectionWallet');
   const pageTitle = document.getElementById('dashPageTitle');
 
   function showSection(section) {
+    // Hide all
+    if (overviewSection) overviewSection.style.display = 'none';
+    if (predictionsSection) predictionsSection.style.display = 'none';
+    if (profileSection) profileSection.style.display = 'none';
+    if (walletSection) walletSection.style.display = 'none';
+    document.querySelectorAll('.dash-nav-link').forEach((l) => l.classList.remove('active'));
+
     if (section === 'profile') {
-      if (overviewSection) overviewSection.style.display = 'none';
       if (profileSection) profileSection.style.display = 'block';
       if (pageTitle) pageTitle.textContent = 'Profile & Settings';
-      document.querySelectorAll('.dash-nav-link').forEach((l) => l.classList.remove('active'));
       profileLinks.forEach((l) => l.classList.add('active'));
+    } else if (section === 'predictions') {
+      if (predictionsSection) predictionsSection.style.display = 'flex';
+      if (pageTitle) pageTitle.textContent = 'My Toss Predictions';
+      predictionsLinks.forEach((l) => l.classList.add('active'));
+      loadMyPredictionsHistory();
+    } else if (section === 'wallet') {
+      if (walletSection) walletSection.style.display = 'flex';
+      if (pageTitle) pageTitle.textContent = 'My Demo Wallet';
+      walletLinks.forEach((l) => l.classList.add('active'));
+      loadWalletBalance();
+      loadWalletTransactions(1);
     } else {
       if (overviewSection) overviewSection.style.display = 'flex';
-      if (profileSection) profileSection.style.display = 'none';
       if (pageTitle) pageTitle.textContent = 'Dashboard Overview';
-      document.querySelectorAll('.dash-nav-link').forEach((l) => l.classList.remove('active'));
       overviewLinks.forEach((l) => l.classList.add('active'));
     }
     closeSidebar();
@@ -386,10 +405,140 @@ function initDashboardNavigation() {
     showSection('overview');
   }));
 
+  predictionsLinks.forEach((l) => l.addEventListener('click', (e) => {
+    e.preventDefault();
+    showSection('predictions');
+  }));
+
   profileLinks.forEach((l) => l.addEventListener('click', (e) => {
     e.preventDefault();
     showSection('profile');
   }));
+
+  walletLinks.forEach((l) => l.addEventListener('click', (e) => {
+    e.preventDefault();
+    showSection('wallet');
+  }));
+
+  // Auto-activate section based on page pathname or hash
+  if (window.location.pathname.includes('wallet.html') || window.location.hash === '#wallet') {
+    showSection('wallet');
+  } else if (window.location.hash === '#predictions') {
+    showSection('predictions');
+  }
+}
+
+/**
+ * Loads user predictions history from /api/predictions/me
+ */
+async function loadMyPredictionsHistory() {
+  const container = document.getElementById('predictionsListContainer');
+  const countIndicator = document.getElementById('predictionCountIndicator');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="skeleton-card skeleton-shimmer" style="height: 80px;"></div>
+    <div class="skeleton-card skeleton-shimmer" style="height: 80px;"></div>
+  `;
+
+  try {
+    const config = window.TossArenaConfig || {};
+    const url = config.getApiUrl
+      ? config.getApiUrl(`${config.ENDPOINTS.PREDICTIONS || '/predictions'}/me`)
+      : 'http://localhost:5000/api/predictions/me';
+
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      credentials: 'include'
+    });
+
+    if (!res.ok) throw new Error('Failed to load predictions history.');
+
+    const payload = await res.json();
+    const predictions = Array.isArray(payload.data) ? payload.data : [];
+
+    if (countIndicator) {
+      countIndicator.textContent = `${predictions.length} prediction${predictions.length === 1 ? '' : 's'}`;
+    }
+
+    if (predictions.length === 0) {
+      container.innerHTML = `
+        <div class="state-box" style="margin: var(--space-4) 0; border-style: dashed;">
+          <div class="state-icon">🎯</div>
+          <h3 class="state-title">No Predictions Yet</h3>
+          <p class="state-desc">You haven't predicted any coin toss outcomes yet. Browse scheduled fixtures to forecast toss winners!</p>
+          <a href="../pages/matches.html" class="btn btn-primary btn-sm">Explore Open Fixtures →</a>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = '';
+    predictions.forEach((p) => {
+      const item = document.createElement('div');
+      item.className = 'prediction-history-item';
+
+      const safeTeamA = escapeHtml(p.teamA || 'Team A');
+      const safeTeamB = escapeHtml(p.teamB || 'Team B');
+      const safePicked = escapeHtml(p.predictedTeam || 'TBD');
+      const safeTournament = escapeHtml(p.tournamentName || 'Cricket Match');
+      const statusKey = (p.predictionStatus || 'pending').toLowerCase();
+
+      let statusBadge = `<span class="badge badge-amber" style="font-size: 0.7rem;">PENDING</span>`;
+      if (statusKey === 'correct') {
+        statusBadge = `<span class="badge badge-emerald" style="font-size: 0.7rem;">✓ CORRECT</span>`;
+      } else if (statusKey === 'incorrect') {
+        statusBadge = `<span class="badge" style="background: rgba(239,68,68,0.15); color: #fca5a5; font-size: 0.7rem;">✕ INCORRECT</span>`;
+      } else if (statusKey === 'cancelled') {
+        statusBadge = `<span class="badge" style="font-size: 0.7rem;">CANCELLED</span>`;
+      }
+
+      const matchSchedule = p.scheduledAt
+        ? new Date(p.scheduledAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
+        : 'TBD';
+
+      const submittedAt = p.createdAt
+        ? new Date(p.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+        : 'Recorded';
+
+      item.innerHTML = `
+        <div class="pred-item-main">
+          <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: 2px;">
+            <span style="font-size: var(--text-xs); color: var(--accent-mint); font-weight: 600;">${safeTournament}</span>
+            ${statusBadge}
+          </div>
+          <div class="pred-item-match">
+            ${safeTeamA} <span style="color: var(--accent-gold); font-size: 0.85rem;">vs</span> ${safeTeamB}
+          </div>
+          <div class="pred-item-meta">
+            <span>📅 Match: ${matchSchedule}</span>
+            <span>📍 ${escapeHtml(p.venue || 'Neutral Ground')}</span>
+            <span>⏱️ Submitted: ${submittedAt}</span>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap;">
+          <div class="pred-item-pick-badge" title="Your Toss Prediction">
+            🪙 ${safePicked}
+          </div>
+          <a href="../pages/match-details.html?id=${encodeURIComponent(p.matchId)}" class="btn btn-outline btn-sm">
+            View Match →
+          </a>
+        </div>
+      `;
+
+      container.appendChild(item);
+    });
+  } catch (err) {
+    console.error('Predictions load error:', err);
+    container.innerHTML = `
+      <div style="padding: var(--space-4); text-align: center; color: #fca5a5; font-size: var(--text-xs);">
+        Could not load predictions history. Please refresh the page.
+      </div>
+    `;
+    if (countIndicator) countIndicator.textContent = 'Error';
+  }
 }
 
 /**
@@ -406,6 +555,264 @@ function initDashboardLogout() {
       window.location.href = '../index.html';
     });
   });
+}
+
+let currentWalletPage = 1;
+let currentWalletType = '';
+let currentWalletSort = 'newest';
+let totalWalletPages = 1;
+
+/**
+ * Loads authoritative virtual demo wallet balance from /api/wallet/me
+ */
+async function loadWalletBalance() {
+  const balanceEl = document.getElementById('walletBalanceAmount');
+  const statDemoBalance = document.getElementById('statDemoBalance');
+  const lastUpdatedEl = document.getElementById('walletLastUpdatedText');
+
+  if (balanceEl) balanceEl.textContent = 'Updating...';
+
+  try {
+    const data = await window.TossArenaAuth.getWallet();
+    const formatted = Number(data.balance || 0).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    if (balanceEl) balanceEl.textContent = formatted;
+    if (statDemoBalance) statDemoBalance.textContent = formatted;
+    if (lastUpdatedEl) {
+      const timeStr = data.updatedAt
+        ? new Date(data.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : 'Just now';
+      lastUpdatedEl.textContent = `Last updated: ${timeStr} UTC`;
+    }
+    return data;
+  } catch (err) {
+    console.error('Wallet balance fetch error:', err);
+    if (balanceEl) balanceEl.textContent = 'Error';
+    if (lastUpdatedEl) lastUpdatedEl.textContent = 'Failed to retrieve balance';
+  }
+}
+
+/**
+ * Loads paginated transaction history from /api/wallet/transactions
+ */
+async function loadWalletTransactions(page = 1) {
+  const tableBody = document.getElementById('walletTxTableBody');
+  const emptyState = document.getElementById('walletTxEmptyState');
+  const errorState = document.getElementById('walletTxErrorState');
+  const errorMessage = document.getElementById('walletTxErrorMessage');
+  const tableWrap = document.getElementById('walletTxTableWrap');
+  const pageInfo = document.getElementById('walletPageInfo');
+  const prevBtn = document.getElementById('walletPrevPageBtn');
+  const nextBtn = document.getElementById('walletNextPageBtn');
+  const countIndicator = document.getElementById('walletTxCountIndicator');
+
+  if (!tableBody) return;
+
+  currentWalletPage = page;
+
+  // Show loading in table
+  if (emptyState) emptyState.style.display = 'none';
+  if (errorState) errorState.style.display = 'none';
+  if (tableWrap) tableWrap.style.display = 'block';
+
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="6" style="text-align: center; padding: var(--space-6); color: var(--text-muted);">
+        Loading ledger transactions...
+      </td>
+    </tr>
+  `;
+
+  try {
+    const result = await window.TossArenaAuth.getWalletTransactions({
+      page,
+      limit: 10,
+      type: currentWalletType || undefined,
+      sort: currentWalletSort
+    });
+
+    const txs = result.transactions || [];
+    const pagination = result.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 };
+    totalWalletPages = pagination.totalPages || 1;
+
+    if (countIndicator) {
+      countIndicator.textContent = `${pagination.total} Total Ledger Record${pagination.total === 1 ? '' : 's'}`;
+    }
+
+    if (pageInfo) {
+      pageInfo.textContent = `Page ${pagination.page} of ${pagination.totalPages || 1} (${pagination.total} transaction${pagination.total === 1 ? '' : 's'})`;
+    }
+
+    if (prevBtn) prevBtn.disabled = pagination.page <= 1;
+    if (nextBtn) nextBtn.disabled = pagination.page >= pagination.totalPages || pagination.totalPages === 0;
+
+    if (txs.length === 0) {
+      if (tableWrap) tableWrap.style.display = 'none';
+      if (emptyState) emptyState.style.display = 'block';
+      return;
+    }
+
+    tableBody.innerHTML = '';
+
+    txs.forEach((tx) => {
+      const tr = document.createElement('tr');
+
+      const dateFormatted = tx.createdAt
+        ? new Date(tx.createdAt).toLocaleString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        : 'Recorded';
+
+      let badgeClass = 'tx-badge-grant';
+      let badgeLabel = 'Demo Grant';
+      let isCredit = true;
+
+      switch (tx.transactionType) {
+        case 'demo_grant':
+          badgeClass = 'tx-badge-grant';
+          badgeLabel = 'Demo Grant';
+          isCredit = true;
+          break;
+        case 'prediction_debit':
+          badgeClass = 'tx-badge-debit';
+          badgeLabel = 'Prediction Stake';
+          isCredit = false;
+          break;
+        case 'prediction_refund':
+          badgeClass = 'tx-badge-refund';
+          badgeLabel = 'Prediction Refund';
+          isCredit = true;
+          break;
+        case 'demo_adjustment':
+          badgeClass = 'tx-badge-adjustment';
+          badgeLabel = 'Demo Adjustment';
+          isCredit = true;
+          break;
+        case 'demo_result_credit':
+          badgeClass = 'tx-badge-result';
+          badgeLabel = 'Result Credit';
+          isCredit = true;
+          break;
+        default:
+          badgeClass = 'tx-badge-grant';
+          badgeLabel = tx.transactionType;
+      }
+
+      const formattedAmount = Number(tx.amount || 0).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+
+      const formattedBalanceAfter = Number(tx.balanceAfter || 0).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+
+      const amountClass = isCredit ? 'tx-amount-credit' : 'tx-amount-debit';
+      const amountSign = isCredit ? '+' : '-';
+
+      let refText = '—';
+      if (tx.referenceType && tx.referenceId) {
+        refText = `${escapeHtml(tx.referenceType)} #${escapeHtml(String(tx.referenceId))}`;
+      } else if (tx.referenceType) {
+        refText = escapeHtml(tx.referenceType);
+      }
+
+      tr.innerHTML = `
+        <td style="font-size: var(--text-xs); color: var(--text-muted);">${dateFormatted}</td>
+        <td>
+          <span class="tx-badge ${badgeClass}">${badgeLabel}</span>
+        </td>
+        <td style="color: var(--text-primary); font-weight: 500;">${escapeHtml(tx.description || 'Virtual demo credit ledger entry')}</td>
+        <td style="font-size: var(--text-xs); color: var(--text-muted);">${refText}</td>
+        <td class="${amountClass}">
+          ${amountSign}${formattedAmount} <span style="font-size: 0.75rem; font-weight: 600;">Credits</span>
+        </td>
+        <td class="tx-balance-after">
+          ${formattedBalanceAfter} <span style="font-size: 0.75rem; color: var(--text-muted);">Credits</span>
+        </td>
+      `;
+
+      tableBody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error('Transactions load error:', err);
+    if (tableWrap) tableWrap.style.display = 'none';
+    if (errorState) errorState.style.display = 'block';
+    if (errorMessage) errorMessage.textContent = err.message || 'Failed to fetch transaction history.';
+  }
+}
+
+/**
+ * Initializes Wallet filter, pagination, and refresh buttons
+ */
+function initWalletControls() {
+  const typeFilter = document.getElementById('walletTypeFilter');
+  const sortFilter = document.getElementById('walletSortFilter');
+  const refreshTxBtn = document.getElementById('walletRefreshTxBtn');
+  const refreshBalanceBtn = document.getElementById('walletRefreshBalanceBtn');
+  const prevBtn = document.getElementById('walletPrevPageBtn');
+  const nextBtn = document.getElementById('walletNextPageBtn');
+  const retryBtn = document.getElementById('walletTxRetryBtn');
+
+  if (typeFilter) {
+    typeFilter.addEventListener('change', (e) => {
+      currentWalletType = e.target.value;
+      currentWalletPage = 1;
+      loadWalletTransactions(1);
+    });
+  }
+
+  if (sortFilter) {
+    sortFilter.addEventListener('change', (e) => {
+      currentWalletSort = e.target.value;
+      currentWalletPage = 1;
+      loadWalletTransactions(1);
+    });
+  }
+
+  if (refreshTxBtn) {
+    refreshTxBtn.addEventListener('click', () => {
+      loadWalletTransactions(currentWalletPage);
+    });
+  }
+
+  if (refreshBalanceBtn) {
+    refreshBalanceBtn.addEventListener('click', () => {
+      loadWalletBalance();
+    });
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      if (currentWalletPage > 1) {
+        currentWalletPage--;
+        loadWalletTransactions(currentWalletPage);
+      }
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      if (currentWalletPage < totalWalletPages) {
+        currentWalletPage++;
+        loadWalletTransactions(currentWalletPage);
+      }
+    });
+  }
+
+  if (retryBtn) {
+    retryBtn.addEventListener('click', () => {
+      loadWalletTransactions(currentWalletPage);
+    });
+  }
 }
 
 function escapeHtml(str) {

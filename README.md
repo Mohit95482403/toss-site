@@ -72,12 +72,13 @@ Day 1 establishes the production-grade foundation for the entire 20-day roadmap:
 - [x] **Day 5 User Dashboard Layout (`frontend/user/dashboard.html`):** Premium sports-tech dashboard with sticky collapsible sidebar, top navigation bar, welcome hero banner, dynamic greeting, and accessible mobile drawer.
 - [x] **Day 5 Account Summary Cards:** 4 real database-backed summary cards displaying verified Account Status, Predictions Made count, Completed Predictions count, and Demo Credit Balance (`1,000.00 Credits` virtual credits, no fake currency).
 - [x] **Day 5 Live Activity Stream (`GET /api/dashboard/activity`):** Real database activity timeline integrating virtual credit grants, prediction stakes, and notifications with localized date/time formatting.
-- [x] **Day 5 Upcoming Matches Preview (`GET /api/matches`):** Real database match fixture feed with tournament name, teams, scheduled dates, and status badges.
-- [x] **Day 5 Self-Service Profile Management (`frontend/user/profile.html` & `PATCH /api/users/me`):** Displays read-only email, role, status, registration date, and allows updating display name with server-side validation, CSRF verification, and mass-assignment protection.
-- [x] **Day 5 Session Security & Logout:** Secure authenticated route guards, user isolation defense (User A cannot access or update User B's records), and session destruction upon logout.
-- [x] **Day 5 Automated Test Suite (`npm run test:dashboard`):** 13 automated tests covering summary statistics, activity feeds, user isolation, profile updates, mass assignment defense, and logout session invalidation with 100% pass rate.
-
-
+- [x] **Day 7 Toss Prediction Engine:** Strict match eligibility validation (only `open` matches, rejecting `locked`, `completed`, or `cancelled` fixtures), server-authoritative UTC cutoff enforcement, canonical team validation, duplicate prediction defense, atomic persistence, and user history (`GET /api/predictions/me`).
+- [x] **Day 8 Virtual Demo Wallet (`GET /api/wallet/me`):** Authoritative demo credit balance retrieval derived strictly from session user identity, idempotent wallet provisioning with 1,000 initial virtual credits, and `chk_wallets_balance_non_negative` check constraint enforcement.
+- [x] **Day 8 Immutable Transaction Ledger (`GET /api/wallet/transactions`):** Complete double-entry audit trail recording every balance modification with `balance_before`, `balance_after`, `amount`, `transaction_type`, `reference_type`, and `reference_id`. Supports bounded server-side pagination (max 50), type filtering allowlist, and date ordering.
+- [x] **Day 8 Atomic Balance Engine (`backend/services/walletService.js`):** Row-level locking (`SELECT ... FOR UPDATE`), atomic balance operations, negative-balance rejection (`INSUFFICIENT_DEMO_CREDITS`), duplicate reference detection, and automated database rollback lifecycle.
+- [x] **Day 8 User Dashboard & Dedicated Wallet UI (`frontend/user/wallet.html` & `frontend/user/dashboard.html`):** Dynamic balance cards, transaction ledger table with responsive overflow, type filtering, pagination controls, friendly empty states, error retry handling, and virtual credit disclaimers.
+- [x] **Day 8 Prediction Integration Audit (Scenario A):** Maintained existing Day 7 prediction behavior (`demo_credits_used = 0.00`) without inventing arbitrary stakes, with the wallet engine ready for future approved stake policies.
+- [x] **Day 8 Automated Test Suites (`npm run test:wallet` & `npm run test:e2e:wallet`):** 21 unit/integration tests and 19 live E2E server tests with 100% pass rate (104 total tests passing across all suites).
 
 ---
 
@@ -389,13 +390,90 @@ When the database contains 0 fixtures matching a query:
 # Run match suite
 npm run test:matches
 
-# Run all test suites (health + auth + dashboard + matches)
+# Run all test suites
 npm test
 ```
 
 ---
 
-## 12. Git Usage Basics
+## 12. Day 7: Toss Prediction Engine, Submission & Match Locking
+
+Authenticated users can forecast coin toss winners for eligible scheduled fixtures using virtual demo credits exclusively.
+
+### 12.1 Submit Toss Prediction
+**`POST /api/predictions`**
+
+* **Authentication:** Required (`authenticate` session cookie).
+* **CSRF Protection:** Required (`X-CSRF-Token` header).
+* **Payload:**
+  ```json
+  {
+    "matchId": 1,
+    "predictedTeam": "India"
+  }
+  ```
+* **Validation & Business Rules:**
+  - `matchId` validated as positive integer; rejects malformed with 400.
+  - `predictedTeam` validated to match either `team_a` or `team_b` for the fixture; rejects invalid with 422.
+  - Match status must be `open`; rejects `locked`, `completed`, `cancelled` fixtures with 409, and `upcoming` fixtures with 422.
+  - Server-authoritative cutoff time check: rejects if scheduled time has passed with 409.
+  - One prediction per user per match enforced both at service layer and via MySQL unique constraint `(user_id, match_id)`.
+  - Rejects duplicate submission with 409 Conflict.
+  - Ownership derived strictly from server session; client cannot spoof `userId`.
+* **Success Response (201 Created):**
+  ```json
+  {
+    "success": true,
+    "message": "Your toss prediction has been submitted successfully.",
+    "data": {
+      "id": 1,
+      "matchId": 1,
+      "matchTitle": "[DEMO] India vs Australia - Champions Trophy Simulation",
+      "predictedTeam": "India",
+      "status": "pending",
+      "createdAt": "2026-10-09T09:40:00.000Z"
+    }
+  }
+  ```
+
+### 12.2 Retrieve User Prediction History
+**`GET /api/predictions/me`**
+
+* **Authentication:** Required.
+* **Query Parameters:** `page` (default 1), `limit` (default 20, max 50).
+* **Behavior:** Returns the authenticated user's prediction history joined with match scheduling, venue, and status details. Complete isolation between users.
+
+### 12.3 Check User Prediction for Specific Match
+**`GET /api/predictions/me/match/:matchId`**
+
+* **Authentication:** Required.
+* **Response:**
+  ```json
+  {
+    "success": true,
+    "hasPredicted": true,
+    "data": {
+      "id": 1,
+      "matchId": 1,
+      "predictedTeam": "India",
+      "status": "pending",
+      "createdAt": "2026-10-09T09:40:00.000Z"
+    }
+  }
+  ```
+
+### 12.4 Running Prediction Automated Tests
+```bash
+# Run prediction suite
+npm run test:predictions
+
+# Run end-to-end integration test
+node tests/e2e-predictions.test.js
+```
+
+---
+
+## 13. Git Usage Basics
 
 ```bash
 # Inspect repository state
@@ -405,14 +483,14 @@ git status
 git add .
 
 # Create a commit
-git commit -m "feat: complete day 6 match discovery, search, filters, pagination, and details"
+git commit -m "feat: complete day 7 toss prediction engine, submission, and validation"
 ```
 
 *Note: `.env` and `node_modules` are automatically ignored to protect secrets and avoid committing build artifacts.*
 
 ---
 
-## 13. 20-Day Development Roadmap
+## 14. 20-Day Development Roadmap
 
 | Day | Milestone Focus |
 | :---: | :--- |
@@ -422,8 +500,8 @@ git commit -m "feat: complete day 6 match discovery, search, filters, pagination
 | **Day 4** | **Authentication, Password Hashing, Sessions, RBAC & CSRF Protection (Completed)** |
 | **Day 5** | **User Dashboard, Profile Management, Wallet Preview & Session Hydration (Completed)** |
 | **Day 6** | **Match Browsing, Match Details, Search, Filters, Pagination & Backend Integration (Completed)** |
-| **Day 7** | Toss Prediction Engine: Market Rules, Cutoff Times & Demo Wager Placement |
-| **Day 8** | Virtual Demo Credit Wallet System: Signup Bonus & Ledger Audit Trails |
+| **Day 7** | **Toss Prediction Engine: Market Rules, Cutoff Times & Submission (Completed)** |
+| **Day 8** | **Virtual Demo Credit Wallet System, Ledger Audit Trails & Balance Management (Completed)** |
 | **Day 9** | Simulated Top-Up & Withdrawal Simulation Workflows (Zero Real Money) |
 | **Day 10** | Prediction Placement Frontend Interface & Real-Time Balance Validation |
 | **Day 11** | User Active Predictions & Historical Prediction Log Views |

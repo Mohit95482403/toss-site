@@ -29,6 +29,14 @@ router.use('/users', userRoutes);
 // Match Fixtures feed endpoints
 router.use('/matches', matchRoutes);
 
+// Toss Predictions endpoints (Day 7)
+const predictionRoutes = require('./predictionRoutes');
+router.use('/predictions', predictionRoutes);
+
+// Virtual Demo Wallet & Transaction Ledger endpoints (Day 8)
+const walletRoutes = require('./walletRoutes');
+router.use('/wallet', walletRoutes);
+
 module.exports = router;
 
 

@@ -358,6 +358,58 @@ const TossArenaAuth = (function () {
     return data;
   }
 
+  /**
+   * Retrieves authoritative virtual demo wallet balance
+   * @returns {Promise<object>}
+   */
+  async function getWallet() {
+    const endpoint = window.TossArenaConfig?.ENDPOINTS?.WALLET || '/wallet/me';
+    const response = await fetch(getUrl(endpoint), {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to retrieve demo wallet balance.');
+    }
+    return data.data;
+  }
+
+  /**
+   * Retrieves paginated transaction history from the immutable ledger
+   * @param {object} params
+   * @param {number} [params.page=1]
+   * @param {number} [params.limit=10]
+   * @param {string} [params.type]
+   * @param {string} [params.sort='newest']
+   * @returns {Promise<{ transactions: Array, pagination: object }>}
+   */
+  async function getWalletTransactions({ page = 1, limit = 10, type, sort = 'newest' } = {}) {
+    const endpoint = window.TossArenaConfig?.ENDPOINTS?.WALLET_TRANSACTIONS || '/wallet/transactions';
+    const url = new URL(getUrl(endpoint), window.location.origin);
+    url.searchParams.set('page', page);
+    url.searchParams.set('limit', limit);
+    if (type) url.searchParams.set('type', type);
+    if (sort) url.searchParams.set('sort', sort);
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to retrieve transaction history.');
+    }
+    return {
+      transactions: data.data || [],
+      pagination: data.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 }
+    };
+  }
+
   return {
     getCsrfToken,
     register,
@@ -368,7 +420,9 @@ const TossArenaAuth = (function () {
     getDashboardActivity,
     updateProfile,
     updateNavState,
-    initPasswordToggles
+    initPasswordToggles,
+    getWallet,
+    getWalletTransactions
   };
 })();
 

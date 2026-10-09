@@ -17,6 +17,10 @@ const errorHandler = (err, req, res, next) => {
     message: err.message || 'An unexpected internal server error occurred'
   };
 
+  if (err.code) {
+    response.code = err.code;
+  }
+
   // Only attach sanitized error details in development if explicitly desired, never in production
   if (!isProduction && err.details) {
     response.details = err.details;

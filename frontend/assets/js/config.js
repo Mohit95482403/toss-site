@@ -26,7 +26,10 @@ const TossArenaConfig = (function () {
       AUTH_ME: '/auth/me',
       DASHBOARD_SUMMARY: '/dashboard/summary',
       DASHBOARD_ACTIVITY: '/dashboard/activity',
-      USER_PROFILE: '/users/me'
+      USER_PROFILE: '/users/me',
+      PREDICTIONS: '/predictions',
+      WALLET: '/wallet/me',
+      WALLET_TRANSACTIONS: '/wallet/transactions'
     },
 
 
