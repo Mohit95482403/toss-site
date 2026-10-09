@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cricket Matches &amp; Fixtures — TossArena (Demo Platform)</title>
-  <meta name="description" content="Browse upcoming cricket fixtures and explore virtual coin toss predictions. 100% demo credits platform.">
+  <title>Match Details — TossArena (Demo Platform)</title>
+  <meta name="description" content="View detailed cricket fixture information, venue, schedule, and virtual toss prediction availability on TossArena.">
 
   <!-- Typography: Inter & Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,88 +65,28 @@
   </header>
 
   <!-- Main Content -->
-  <main style="flex: 1; padding: var(--space-12) 0 var(--space-16) 0;">
-    <div class="container">
-      <!-- Page Header -->
-      <div class="section-header" style="text-align: left; max-width: 100%; margin-bottom: var(--space-8);">
-        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-2);">
-          <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
-            <span class="badge badge-emerald">Cricket Fixtures</span>
-            <span class="badge" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-subtle); color: var(--text-secondary);">100% Virtual Demo Credits</span>
-          </div>
-          <div class="match-count-indicator" id="matchCountIndicator">
-            <span class="match-count-badge" id="matchCountBadge">0</span> matches available
-          </div>
-        </div>
-        <h1 style="font-size: clamp(2rem, 4vw, 2.75rem); margin-bottom: var(--space-2);">Explore Cricket Matches</h1>
-        <p style="max-width: 720px; color: var(--text-secondary);">
-          Discover scheduled domestic and international cricket matches in our platform database. Examine venue conditions, toss history, and forecast coin toss outcomes using virtual demo credits exclusively.
-        </p>
-      </div>
+  <main style="flex: 1; padding: var(--space-10) 0 var(--space-16) 0;">
+    <div class="container" style="max-width: 960px;">
 
-      <!-- Filter & Search Toolbar -->
-      <div class="filter-bar">
-        <!-- Search Input with Clear Button -->
-        <div class="search-box">
-          <span class="search-icon-inside" aria-hidden="true">🔍</span>
-          <input
-            type="search"
-            id="matchSearchInput"
-            class="search-input"
-            placeholder="Search teams, tournaments, or fixtures..."
-            aria-label="Search cricket fixtures"
-            autocomplete="off"
-          >
-          <button type="button" class="search-clear-btn is-hidden" id="clearSearchBtn" aria-label="Clear search input">&times;</button>
-        </div>
+      <!-- Breadcrumb Navigation -->
+      <nav class="breadcrumb-nav" aria-label="Breadcrumbs">
+        <a href="../index.html">Home</a>
+        <span class="separator">/</span>
+        <a href="matches.html">Matches</a>
+        <span class="separator">/</span>
+        <span class="current-page" id="breadcrumbMatchTitle">Match Details</span>
+      </nav>
 
-        <!-- Status Filter Chips -->
-        <div class="status-filters" role="group" aria-label="Filter matches by status">
-          <button type="button" class="filter-chip active" data-status="all">All Matches</button>
-          <button type="button" class="filter-chip" data-status="open">Open</button>
-          <button type="button" class="filter-chip" data-status="upcoming">Upcoming</button>
-          <button type="button" class="filter-chip" data-status="locked">Locked</button>
-          <button type="button" class="filter-chip" data-status="completed">Completed</button>
-        </div>
-
-        <!-- Tournament & Sort Selectors -->
-        <div class="filter-dropdowns">
-          <select id="tournamentFilterSelect" class="filter-select" aria-label="Filter by tournament">
-            <option value="">All Tournaments</option>
-          </select>
-
-          <select id="matchSortSelect" class="filter-select" aria-label="Sort fixtures">
-            <option value="date_asc">Soonest First</option>
-            <option value="date_desc">Latest Scheduled</option>
-            <option value="teams_asc">Teams (A–Z)</option>
-            <option value="teams_desc">Teams (Z–A)</option>
-            <option value="status">Status</option>
-          </select>
-
-          <!-- Reset Button -->
-          <button type="button" class="btn btn-secondary btn-sm" id="resetFiltersBtn">
-            Reset Filters
-          </button>
+      <!-- Dynamic Content Area -->
+      <div id="matchDetailsContentArea">
+        <!-- Loading State Skeleton -->
+        <div class="skeleton-card skeleton-shimmer" style="height: 320px; margin-bottom: var(--space-6);"></div>
+        <div class="match-details-grid">
+          <div class="skeleton-card skeleton-shimmer" style="height: 200px;"></div>
+          <div class="skeleton-card skeleton-shimmer" style="height: 200px;"></div>
         </div>
       </div>
 
-      <!-- Matches Grid Container (dynamically populated by matches.js) -->
-      <div class="matches-grid" id="matchesListContainer">
-        <div class="skeleton-card skeleton-shimmer"></div>
-        <div class="skeleton-card skeleton-shimmer"></div>
-        <div class="skeleton-card skeleton-shimmer"></div>
-        <div class="skeleton-card skeleton-shimmer"></div>
-      </div>
-
-      <!-- Pagination Controls (dynamically populated by matches.js) -->
-      <div class="pagination-bar" id="paginationContainer" style="display: none;">
-        <div class="pagination-info" id="paginationInfo">Showing 0 of 0 matches</div>
-        <div class="pagination-controls" id="paginationControls">
-          <button type="button" class="pagination-btn" id="prevPageBtn" disabled aria-label="Previous page">← Previous</button>
-          <span id="pageNumbersContainer" style="display: flex; gap: 0.25rem;"></span>
-          <button type="button" class="pagination-btn" id="nextPageBtn" disabled aria-label="Next page">Next →</button>
-        </div>
-      </div>
     </div>
   </main>
 
@@ -197,7 +137,7 @@
 
       <div class="footer-bottom">
         <p>&copy; <span id="currentYear">2026</span> TossArena. Strictly a virtual-credit simulation platform.</p>
-        <p>Day 3: Premium Public Website</p>
+        <p>Day 6: Match Browsing &amp; Match Details</p>
       </div>
     </div>
   </footer>
@@ -206,7 +146,6 @@
   <script src="../assets/js/config.js"></script>
   <script src="../assets/js/auth.js"></script>
   <script src="../assets/js/main.js"></script>
-  <script src="../assets/js/matches.js"></script>
+  <script src="../assets/js/match-details.js"></script>
 </body>
 </html>
-

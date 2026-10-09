@@ -265,7 +265,7 @@ function renderMatches(container, matches) {
         <div>📅 <strong>Scheduled:</strong> ${scheduledDate}</div>
         <div>📍 <strong>Venue:</strong> ${escapeHtml(m.venue || 'Neutral Ground')}</div>
       </div>
-      <a href="pages/matches.html" class="btn btn-outline btn-sm" style="margin-top: auto; width: 100%;">View Details</a>
+      <a href="pages/match-details.html?id=${encodeURIComponent(m.id)}" class="btn btn-outline btn-sm" style="margin-top: auto; width: 100%;">View Details →</a>
     `;
     container.appendChild(card);
   });

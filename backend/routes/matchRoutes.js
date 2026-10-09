@@ -8,6 +8,8 @@ const router = express.Router();
 const matchController = require('../controllers/matchController');
 
 router.get('/', matchController.getMatches);
+router.get('/tournaments', matchController.getTournaments);
 router.get('/:id', matchController.getMatchById);
 
 module.exports = router;
+

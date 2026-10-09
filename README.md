@@ -283,7 +283,119 @@ Expected HTTP 404 response:
 
 ---
 
-## 11. Git Usage Basics
+## 11. Day 6: Match Discovery, Search, Filters, Pagination & Details API
+
+The platform provides public, secure, read-only cricket match discovery endpoints powered by MySQL.
+
+### 11.1 List Matches
+**`GET /api/matches`**
+
+Supports optional query parameters:
+- `search` (string): Keyword search across `team_a`, `team_b`, `tournament_name`, and `title`. Special SQL characters (`%`, `_`) are safely escaped.
+- `status` (string): Filter by valid match statuses (`open`, `upcoming`, `locked`, `completed`, `cancelled`).
+- `tournament` (string): Filter by tournament name.
+- `sort` (string): Allowlisted sort order (`date_asc`, `date_desc`, `teams_asc`, `teams_desc`, `status`). Defaults to `date_asc`.
+- `page` (number): 1-indexed page number (default `1`).
+- `limit` (number): Number of records per page (default `12`, capped at max `50`).
+
+Example request:
+```bash
+curl "http://localhost:5000/api/matches?search=India&status=upcoming&page=1&limit=12&sort=date_asc"
+```
+
+Example response:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "[DEMO] India vs Australia - Champions Trophy Simulation",
+      "team_a": "India",
+      "team_b": "Australia",
+      "tournament_name": "Demo International Series",
+      "venue": "Melbourne Cricket Ground",
+      "scheduled_at": "2026-10-15T14:00:00.000Z",
+      "status": "upcoming",
+      "result_toss_winner": null,
+      "result_decision": null,
+      "created_at": "2026-10-09T07:51:00.000Z",
+      "updated_at": "2026-10-09T07:51:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 12,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+### 11.2 Get Tournaments
+**`GET /api/matches/tournaments`**
+
+Returns a distinct list of tournament names from scheduled database records.
+
+Example response:
+```json
+{
+  "success": true,
+  "data": [
+    "Demo International Series",
+    "T20 Global League Demo"
+  ]
+}
+```
+
+### 11.3 Match Details
+**`GET /api/matches/:id`**
+
+Retrieves a single fixture by database ID. Validates ID strictly as a positive integer. Rejects malformed IDs with 400 Bad Request and missing fixtures with 404 Not Found.
+
+Example request:
+```bash
+curl http://localhost:5000/api/matches/1
+```
+
+Example response:
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "title": "[DEMO] India vs Australia - Champions Trophy Simulation",
+    "team_a": "India",
+    "team_b": "Australia",
+    "tournament_name": "Demo International Series",
+    "venue": "Melbourne Cricket Ground",
+    "scheduled_at": "2026-10-15T14:00:00.000Z",
+    "status": "upcoming",
+    "result_toss_winner": null,
+    "result_decision": null,
+    "created_at": "2026-10-09T07:51:00.000Z",
+    "updated_at": "2026-10-09T07:51:00.000Z"
+  }
+}
+```
+
+### 11.4 Empty Database State Handling
+When the database contains 0 fixtures matching a query:
+- Returns HTTP 200 with `"data": []` and `"pagination": { "page": 1, "limit": 12, "total": 0, "totalPages": 0 }`.
+- Frontend displays an informative empty state ("No Matches Found. Try changing your search or filters.") with a "Clear Filters" action. No simulated or fake placeholder matches are generated.
+
+### 11.5 Running Match Automated Tests
+```bash
+# Run match suite
+npm run test:matches
+
+# Run all test suites (health + auth + dashboard + matches)
+npm test
+```
+
+---
+
+## 12. Git Usage Basics
 
 ```bash
 # Inspect repository state
@@ -293,26 +405,26 @@ git status
 git add .
 
 # Create a commit
-git commit -m "feat: complete day 1 project initialization and backend foundation"
+git commit -m "feat: complete day 6 match discovery, search, filters, pagination, and details"
 ```
 
 *Note: `.env` and `node_modules` are automatically ignored to protect secrets and avoid committing build artifacts.*
 
 ---
 
-## 12. Planned 20-Day Development Roadmap
+## 13. 20-Day Development Roadmap
 
 | Day | Milestone Focus |
 | :---: | :--- |
 | **Day 1** | **Project Initialization, Folder Structure & Backend Foundation (Completed)** |
 | **Day 2** | **MySQL Database Architecture, Schemas, Connection Pool (`mysql2`) & Migrations (Completed)** |
 | **Day 3** | **Premium Public Website, Landing Page, Navigation & API Integration (Completed)** |
-| **Day 4** | Authentication Foundation — Registration, Login, Password Hashing, Sessions, Validation, and Role-Aware Access |
-| **Day 5** | Cricket Match Model, Fixtures API & Admin Match Creation |
-| **Day 6** | Coin Toss Prediction Model, Multi-Market Validation & Odds Service |
-| **Day 7** | Virtual Credit Wallet Model, Ledger Schema & 1,000 Signup Bonus Credit Distribution |
-| **Day 8** | Simulated Wallet Top-Up & Withdrawal Simulation Workflows (Zero Real Money) |
-| **Day 9** | User Dashboard UI: Wallet Balance, Transaction Ledger & Auditing |
+| **Day 4** | **Authentication, Password Hashing, Sessions, RBAC & CSRF Protection (Completed)** |
+| **Day 5** | **User Dashboard, Profile Management, Wallet Preview & Session Hydration (Completed)** |
+| **Day 6** | **Match Browsing, Match Details, Search, Filters, Pagination & Backend Integration (Completed)** |
+| **Day 7** | Toss Prediction Engine: Market Rules, Cutoff Times & Demo Wager Placement |
+| **Day 8** | Virtual Demo Credit Wallet System: Signup Bonus & Ledger Audit Trails |
+| **Day 9** | Simulated Top-Up & Withdrawal Simulation Workflows (Zero Real Money) |
 | **Day 10** | Prediction Placement Frontend Interface & Real-Time Balance Validation |
 | **Day 11** | User Active Predictions & Historical Prediction Log Views |
 | **Day 12** | Admin Portal Authentication, Role Verification & Admin Layout |
@@ -327,6 +439,7 @@ git commit -m "feat: complete day 1 project initialization and backend foundatio
 
 ---
 
-## 13. License & Disclaimer
+## 14. License & Disclaimer
 
-This project is licensed under the ISC License. Strictly for demonstration and simulation purposes.
+This project is licensed under the ISC License. Strictly for demonstration and simulation purposes with 100% virtual demo credits. Real currency betting, payments, and cash redemptions are strictly prohibited.
+

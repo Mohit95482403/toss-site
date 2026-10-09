@@ -245,7 +245,7 @@ async function loadUpcomingMatchesPreview() {
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; font-size: var(--text-xs); color: var(--text-muted);">
           <span>📅 ${dateStr}</span>
-          <a href="../pages/matches.html" style="color: var(--accent-mint); font-weight: 600; text-decoration: none;">View Details →</a>
+          <a href="../pages/match-details.html?id=${encodeURIComponent(m.id)}" style="color: var(--accent-mint); font-weight: 600; text-decoration: none;">View Details →</a>
         </div>
       `;
       container.appendChild(card);
