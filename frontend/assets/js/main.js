@@ -166,6 +166,9 @@ async function checkBackendHealth() {
 }
 
 function initBackendHealthChecker() {
+  const statusDetails = document.getElementById('statusDetails');
+  if (!statusDetails) return;
+
   const retryBtn = document.getElementById('retryHealthBtn');
   if (retryBtn) {
     retryBtn.addEventListener('click', checkBackendHealth);
