@@ -13,13 +13,19 @@ const TossArenaConfig = (function () {
     API_ORIGIN,
     API_BASE_URL: `${API_ORIGIN}/api`,
     APP_NAME: 'TossArena',
-    APP_VERSION: '1.0.0 (Day 3 Public Web)',
+    APP_VERSION: '1.0.0 (Day 4 Authentication)',
     ENDPOINTS: {
       HEALTH: '/health',
       HEALTH_DB: '/health/db',
       MATCHES: '/matches',
-      ROOT: '/'
+      ROOT: '/',
+      AUTH_CSRF: '/auth/csrf',
+      AUTH_REGISTER: '/auth/register',
+      AUTH_LOGIN: '/auth/login',
+      AUTH_LOGOUT: '/auth/logout',
+      AUTH_ME: '/auth/me'
     },
+
     /**
      * Resolves an API path to a fully qualified URL
      * @param {string} endpoint - API path (e.g. '/matches')

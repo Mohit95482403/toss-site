@@ -60,6 +60,17 @@ Day 1 establishes the production-grade foundation for the entire 20-day roadmap:
 - [x] **Day 3 Match Explorer (`frontend/pages/matches.html`):** Debounced keyword search, status filter chips, responsive cards, loading skeletons, and graceful empty/error states via `matches.js`.
 - [x] **Day 3 Rules & FAQ (`frontend/pages/how-to-play.html`):** 4-step explanation guide and accessible interactive FAQ accordion.
 - [x] **Day 3 Responsive Navigation & Drawer:** Slide-in drawer with backdrop, Escape-key closing, link auto-closing, and support for viewports from 360px to 1920px.
+- [x] **Day 4 User Registration (`POST /api/auth/register`):** Full name, email normalization, bcrypt password hashing (12 rounds), password length policy (>=12 chars), duplicate email defense, and automatic 1,000 virtual demo credits onboarding grant.
+- [x] **Day 4 User Login (`POST /api/auth/login`):** Parameterized queries, timing-safe verification, account status checks (`active`, `suspended`, `banned`), session ID regeneration against fixation attacks, and `last_login_at` timestamp tracking.
+- [x] **Day 4 MySQL Session Persistence:** Server-side sessions via `express-mysql-session` sharing the connection pool, stored in non-destructive `sessions` table.
+- [x] **Day 4 Session Destruction & Logout (`POST /api/auth/logout`):** Destroys server-side session in MySQL and clears HTTP-Only cookie.
+- [x] **Day 4 Current User Endpoint (`GET /api/auth/me`):** Authenticated user profile and demo credit balance.
+- [x] **Day 4 CSRF & Origin Security:** Session-bound cryptographic CSRF protection (`GET /api/auth/csrf`), timing-safe verification on state-changing requests, and strict origin validation.
+- [x] **Day 4 Rate Limiting:** Brute-force and spam protection on `/api/auth/login` (10/15min) and `/api/auth/register` (10/1hr).
+- [x] **Day 4 Role-Based Access Control (RBAC):** Server-authoritative `authenticate` and `authorize('admin')` middleware; public registration cannot grant admin roles.
+- [x] **Day 4 Frontend Auth Integration:** Real registration (`register.html`) and login (`login.html`) forms with live validation, show/hide password toggles, prefill handling, and dynamic navbar state displaying username and demo credits across pages (`auth.js`).
+- [x] **Day 4 Automated Test Suite (`npm run test:auth`):** 23 automated tests verifying all security rules, edge cases, RBAC, and regressions with 100% pass rate.
+
 
 ---
 

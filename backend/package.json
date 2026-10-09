@@ -7,7 +7,9 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "test": "node tests/health.test.js",
-    "test:db": "node scripts/test-db.js"
+    "test:db": "node scripts/test-db.js",
+    "test:auth": "node tests/auth.test.js"
+
   },
   "keywords": [
     "cricket",
@@ -19,9 +21,14 @@
   "author": "TossArena Engineering Team",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "express-mysql-session": "^3.0.3",
+    "express-rate-limit": "^8.7.1",
+    "express-session": "^1.19.0",
     "helmet": "^8.0.0",
     "mysql2": "^3.24.5"
   }

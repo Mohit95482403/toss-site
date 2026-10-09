@@ -21,38 +21,87 @@
         <span>Toss<span class="highlight">Arena</span></span>
       </a>
       <div style="display: flex; gap: var(--space-3); align-items: center;">
-        <a href="matches.html" class="nav-link" style="display: none; @media(min-width:600px){display:block;}">Matches</a>
+        <a href="register.html" class="nav-link">Create Account</a>
         <a href="../index.html" class="btn btn-outline btn-sm">← Back to Home</a>
       </div>
     </div>
   </header>
 
   <!-- Main Content -->
-  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: var(--space-12) var(--space-4);">
-    <div class="match-card" style="max-width: 460px; width: 100%; text-align: center; padding: var(--space-8) var(--space-6);">
-      <span class="badge badge-amber" style="margin-bottom: var(--space-4);">
-        Scheduled for Day 4 • Authentication Foundation
-      </span>
-      <h1 style="font-size: var(--text-2xl); margin-bottom: var(--space-2);">User Sign In</h1>
-      <p style="margin-bottom: var(--space-6); font-size: var(--text-sm);">
-        Authentication workflows with secure sessions, bcrypt password hashing, and role validation are scheduled for implementation on Day 4.
-      </p>
+  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: var(--space-8) var(--space-4);">
+    <div class="auth-wrapper">
+      <div class="auth-header">
+        <span class="badge badge-emerald" style="margin-bottom: var(--space-3);">
+          ⚡ Member Access
+        </span>
+        <h1 class="auth-title">Welcome Back</h1>
+        <p class="auth-subtitle">
+          Sign in to manage your virtual demo credits and match toss predictions.
+        </p>
+      </div>
 
-      <div style="background: var(--bg-elevated); border: 1px dashed var(--border-medium); border-radius: var(--radius-sm); padding: var(--space-5); margin-bottom: var(--space-6); text-align: left;">
-        <div style="font-weight: 700; color: var(--accent-mint); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-2);">
-          Planned Authentication Architecture:
+      <!-- Alert Banner for Feedback -->
+      <div id="authAlert" class="alert-banner" role="alert" aria-live="polite"></div>
+
+      <!-- Login Form -->
+      <form id="loginForm" class="auth-form" novalidate>
+        <!-- Email Address -->
+        <div class="form-group">
+          <label for="email" class="form-label">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            placeholder="you@example.com"
+            required
+            autocomplete="email"
+            autofocus
+          >
+          <span class="form-error" id="emailError"></span>
         </div>
-        <ul style="list-style: none; font-size: var(--text-xs); color: var(--text-secondary); display: flex; flex-direction: column; gap: var(--space-2);">
-          <li>• Validated Email / Username &amp; Password inputs</li>
-          <li>• HTTP-Only secure session cookies (`express-session`)</li>
-          <li>• Role-aware redirection (Regular User vs Administrator)</li>
-        </ul>
-      </div>
 
-      <div style="display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap;">
-        <a href="register.html" class="btn btn-primary btn-sm">Create New Account</a>
-        <a href="../index.html" class="btn btn-secondary btn-sm">Return to Home</a>
-      </div>
+        <!-- Password -->
+        <div class="form-group">
+          <div class="form-label">
+            <span>Password</span>
+            <a href="#" id="forgotPasswordLink" style="text-transform: none; font-size: var(--text-xs); color: var(--accent-mint); font-weight: 500;">
+              Forgot password?
+            </a>
+          </div>
+          <div class="input-container">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input"
+              placeholder="Enter your password"
+              required
+              autocomplete="current-password"
+            >
+            <button
+              type="button"
+              class="input-toggle-btn"
+              data-toggle-password="password"
+              aria-label="Toggle password visibility"
+            >
+              Show
+            </button>
+          </div>
+          <span class="form-error" id="passwordError"></span>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; margin-top: var(--space-2);">
+          Sign In
+        </button>
+
+        <!-- Create Account Prompt -->
+        <div style="text-align: center; margin-top: var(--space-2); font-size: var(--text-xs); color: var(--text-secondary);">
+          Don't have an account yet?
+          <a href="register.html" style="color: var(--accent-mint); font-weight: 600;">Create one here (1,000 free credits)</a>
+        </div>
+      </form>
     </div>
   </main>
 
@@ -60,11 +109,110 @@
   <footer class="site-footer" style="padding: var(--space-6) 0;">
     <div class="container footer-bottom" style="border-top: none; padding-top: 0;">
       <p>&copy; <span id="currentYear">2026</span> TossArena. Strictly a virtual-credit simulation platform.</p>
-      <p>Day 3: Public Website</p>
+      <p>Secure Session Authentication (Day 4)</p>
     </div>
   </footer>
 
   <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/auth.js"></script>
   <script src="../assets/js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('loginForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const alertBox = document.getElementById('authAlert');
+      const emailInput = document.getElementById('email');
+
+      function showAlert(message, type = 'error') {
+        alertBox.textContent = message;
+        alertBox.className = `alert-banner alert-${type}`;
+        alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      function clearAlert() {
+        alertBox.textContent = '';
+        alertBox.className = 'alert-banner';
+      }
+
+      function clearFieldErrors() {
+        document.querySelectorAll('.form-error').forEach((el) => {
+          el.textContent = '';
+          el.classList.remove('is-visible');
+        });
+      }
+
+      function setFieldError(fieldId, errorMsg) {
+        const errorEl = document.getElementById(`${fieldId}Error`);
+        if (errorEl) {
+          errorEl.textContent = errorMsg;
+          errorEl.classList.add('is-visible');
+        }
+      }
+
+      // Check query parameters (e.g. ?registered=true&email=...)
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('registered') === 'true') {
+        const registeredEmail = urlParams.get('email');
+        if (registeredEmail) {
+          emailInput.value = registeredEmail;
+        }
+        showAlert('🎉 Account created! Your 1,000 complimentary demo credits are ready. Please sign in.', 'success');
+      }
+
+      // Forgot password modal/toast placeholder
+      document.getElementById('forgotPasswordLink')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        showAlert('Password recovery will be available in an upcoming update. If you need assistance, please contact platform support.', 'success');
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearAlert();
+        clearFieldErrors();
+
+        const email = emailInput.value.trim();
+        const password = document.getElementById('password').value;
+
+        let hasError = false;
+
+        if (!email) {
+          setFieldError('email', 'Email address is required.');
+          hasError = true;
+        }
+
+        if (!password) {
+          setFieldError('password', 'Password is required.');
+          hasError = true;
+        }
+
+        if (hasError) return;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Verifying credentials...';
+
+        try {
+          const result = await window.TossArenaAuth.login({ email, password });
+
+          showAlert(`Welcome back, ${result.user.fullName}! Redirecting...`, 'success');
+
+          // Clean up password field
+          document.getElementById('password').value = '';
+
+          setTimeout(() => {
+            // Role-based routing: admin or regular user
+            if (result.user.role === 'admin') {
+              window.location.href = '../index.html?role=admin&auth=success';
+            } else {
+              window.location.href = '../index.html?auth=success';
+            }
+          }, 1000);
+        } catch (err) {
+          showAlert(err.message || 'Login failed. Please check your email and password.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Sign In';
+        }
+      });
+    });
+  </script>
 </body>
 </html>

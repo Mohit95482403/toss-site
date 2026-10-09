@@ -28,30 +28,136 @@
   </header>
 
   <!-- Main Content -->
-  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: var(--space-12) var(--space-4);">
-    <div class="match-card" style="max-width: 480px; width: 100%; text-align: center; padding: var(--space-8) var(--space-6);">
-      <span class="badge badge-amber" style="margin-bottom: var(--space-4);">
-        Scheduled for Day 4 • Authentication Foundation
-      </span>
-      <h1 style="font-size: var(--text-2xl); margin-bottom: var(--space-2);">Create Account</h1>
-      <p style="margin-bottom: var(--space-6); font-size: var(--text-sm);">
-        New user registration with automatic demo wallet provisioning (1,000 complimentary virtual credits) is scheduled for Day 4.
-      </p>
-
-      <!-- Welcome Perk Box -->
-      <div style="background: rgba(25, 211, 162, 0.08); border: 1px solid rgba(25, 211, 162, 0.25); border-radius: var(--radius-sm); padding: var(--space-5); margin-bottom: var(--space-6); text-align: left;">
-        <div style="font-weight: 700; color: var(--accent-mint); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-2);">
-          🎁 Onboarding Grant (100% Virtual):
-        </div>
-        <p style="font-size: var(--text-xs); color: var(--text-secondary); margin: 0; line-height: 1.5;">
-          Upon registration, your account is automatically credited with 1,000 demo credits. No actual money is ever requested, charged, or accepted.
+  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: var(--space-8) var(--space-4);">
+    <div class="auth-wrapper">
+      <div class="auth-header">
+        <span class="badge badge-emerald" style="margin-bottom: var(--space-3);">
+          🪙 1,000 Demo Credits On Registration
+        </span>
+        <h1 class="auth-title">Create Account</h1>
+        <p class="auth-subtitle">
+          Join TossArena to participate in simulated cricket coin toss predictions.
         </p>
       </div>
 
-      <div style="display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap;">
-        <a href="login.html" class="btn btn-outline btn-sm">Already Have an Account?</a>
-        <a href="../index.html" class="btn btn-secondary btn-sm">Return to Home</a>
-      </div>
+      <!-- Alert Banner for Messages -->
+      <div id="authAlert" class="alert-banner" role="alert" aria-live="polite"></div>
+
+      <!-- Registration Form -->
+      <form id="registerForm" class="auth-form" novalidate>
+        <!-- Full Name -->
+        <div class="form-group">
+          <label for="fullName" class="form-label">Full Name</label>
+          <input
+            type="text"
+            id="fullName"
+            name="fullName"
+            class="form-input"
+            placeholder="e.g. Rahul Sharma"
+            required
+            minlength="2"
+            maxlength="100"
+            autocomplete="name"
+          >
+          <span class="form-error" id="fullNameError"></span>
+        </div>
+
+        <!-- Email Address -->
+        <div class="form-group">
+          <label for="email" class="form-label">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            placeholder="you@example.com"
+            required
+            maxlength="150"
+            autocomplete="email"
+          >
+          <span class="form-error" id="emailError"></span>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label for="password" class="form-label">
+            Password
+            <span style="text-transform: none; font-weight: normal; color: var(--text-muted);">(Min. 12 chars)</span>
+          </label>
+          <div class="input-container">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input"
+              placeholder="At least 12 characters"
+              required
+              minlength="12"
+              maxlength="128"
+              autocomplete="new-password"
+            >
+            <button
+              type="button"
+              class="input-toggle-btn"
+              data-toggle-password="password"
+              aria-label="Toggle password visibility"
+            >
+              Show
+            </button>
+          </div>
+          <span class="form-helper">Use 12+ characters with letters, numbers, or a memorable passphrase.</span>
+          <span class="form-error" id="passwordError"></span>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <label for="confirmPassword" class="form-label">Confirm Password</label>
+          <div class="input-container">
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              class="form-input"
+              placeholder="Re-enter your password"
+              required
+              minlength="12"
+              maxlength="128"
+              autocomplete="new-password"
+            >
+            <button
+              type="button"
+              class="input-toggle-btn"
+              data-toggle-password="confirmPassword"
+              aria-label="Toggle confirm password visibility"
+            >
+              Show
+            </button>
+          </div>
+          <span class="form-error" id="confirmPasswordError"></span>
+        </div>
+
+        <!-- Terms & Simulation Acknowledgment -->
+        <div class="form-group" style="margin-top: var(--space-1);">
+          <label class="form-checkbox-label">
+            <input type="checkbox" id="termsCheck" class="form-checkbox" required>
+            <span>
+              I understand that TossArena uses <strong>strictly virtual demo credits</strong>. No real currency is accepted, deposited, or paid out.
+            </span>
+          </label>
+          <span class="form-error" id="termsError"></span>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; margin-top: var(--space-2);">
+          Create Account &amp; Claim 1,000 Credits
+        </button>
+
+        <!-- Existing Account Prompt -->
+        <div style="text-align: center; margin-top: var(--space-2); font-size: var(--text-xs); color: var(--text-secondary);">
+          Already have an account?
+          <a href="login.html" style="color: var(--accent-mint); font-weight: 600;">Sign in here</a>
+        </div>
+      </form>
     </div>
   </main>
 
@@ -59,11 +165,115 @@
   <footer class="site-footer" style="padding: var(--space-6) 0;">
     <div class="container footer-bottom" style="border-top: none; padding-top: 0;">
       <p>&copy; <span id="currentYear">2026</span> TossArena. Strictly a virtual-credit simulation platform.</p>
-      <p>Day 3: Public Website</p>
+      <p>Secure Session Authentication (Day 4)</p>
     </div>
   </footer>
 
   <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/auth.js"></script>
   <script src="../assets/js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('registerForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const alertBox = document.getElementById('authAlert');
+
+      function showAlert(message, type = 'error') {
+        alertBox.textContent = message;
+        alertBox.className = `alert-banner alert-${type}`;
+        alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      function clearAlert() {
+        alertBox.textContent = '';
+        alertBox.className = 'alert-banner';
+      }
+
+      function clearFieldErrors() {
+        document.querySelectorAll('.form-error').forEach((el) => {
+          el.textContent = '';
+          el.classList.remove('is-visible');
+        });
+      }
+
+      function setFieldError(fieldId, errorMsg) {
+        const errorEl = document.getElementById(`${fieldId}Error`);
+        if (errorEl) {
+          errorEl.textContent = errorMsg;
+          errorEl.classList.add('is-visible');
+        }
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearAlert();
+        clearFieldErrors();
+
+        const fullName = document.getElementById('fullName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const termsAccepted = document.getElementById('termsCheck').checked;
+
+        let hasError = false;
+
+        if (!fullName || fullName.length < 2) {
+          setFieldError('fullName', 'Full name must be at least 2 characters.');
+          hasError = true;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email || !emailRegex.test(email)) {
+          setFieldError('email', 'Please enter a valid email address.');
+          hasError = true;
+        }
+
+        if (!password || password.length < 12) {
+          setFieldError('password', 'Password must be at least 12 characters long.');
+          hasError = true;
+        }
+
+        if (password !== confirmPassword) {
+          setFieldError('confirmPassword', 'Passwords do not match.');
+          hasError = true;
+        }
+
+        if (!termsAccepted) {
+          setFieldError('terms', 'Please acknowledge the virtual-credit terms.');
+          hasError = true;
+        }
+
+        if (hasError) return;
+
+        // Disable submit button during request
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating Account...';
+
+        try {
+          const result = await window.TossArenaAuth.register({
+            fullName,
+            email,
+            password,
+            confirmPassword
+          });
+
+          // Registration succeeded! Clear password fields
+          document.getElementById('password').value = '';
+          document.getElementById('confirmPassword').value = '';
+
+          showAlert(result.message || 'Account created successfully! Redirecting to sign in...', 'success');
+
+          // Redirect to sign in page after short delay
+          setTimeout(() => {
+            window.location.href = `login.html?registered=true&email=${encodeURIComponent(email)}`;
+          }, 1500);
+        } catch (err) {
+          showAlert(err.message || 'Registration failed. Please check your information and try again.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Create Account & Claim 1,000 Credits';
+        }
+      });
+    });
+  </script>
 </body>
 </html>
