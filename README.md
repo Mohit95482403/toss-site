@@ -51,6 +51,11 @@ Day 1 establishes the production-grade foundation for the entire 20-day roadmap:
 - [x] Centralized frontend configuration bridge (`frontend/assets/js/config.js`).
 - [x] Complete technical architecture documentation in `docs/PROJECT_ARCHITECTURE.md`.
 - [x] Automated test suite verifying health endpoints passing 100%.
+- [x] **Day 2 MySQL Foundation:** Created 7 foundational tables in `backend/sql/schema.sql` (InnoDB, utf8mb4, UTC policy).
+- [x] **Day 2 Connection Pool:** Implemented single shared pool via `mysql2/promise` in `backend/config/db.js`.
+- [x] **Day 2 Database Test Script:** Created `backend/scripts/test-db.js` (`npm run test:db`).
+- [x] **Day 2 Readiness Endpoint:** Implemented `GET /api/health/db` reporting live MySQL status without leaking secrets.
+- [x] **Day 2 Demo Seed Script:** Created `backend/sql/seed-dev.sql` with safe idempotent fixtures.
 
 ---
 
@@ -205,8 +210,14 @@ cd backend
 npm test
 ```
 
+### Running Database Connectivity Test:
+```bash
+cd backend
+npm run test:db
+```
+
 ### Manual Verification via Curl or Browser:
-Execute a GET request to the health endpoint:
+Execute a GET request to the API health endpoint:
 ```bash
 curl http://localhost:5000/api/health
 ```
@@ -218,6 +229,21 @@ Expected HTTP 200 response:
   "message": "TossArena API is running",
   "environment": "development",
   "timestamp": "2026-10-09T07:35:00.000Z"
+}
+```
+
+Execute a GET request to the Database health endpoint:
+```bash
+curl http://localhost:5000/api/health/db
+```
+
+Expected HTTP 200 response:
+```json
+{
+  "success": true,
+  "database": "connected",
+  "name": "tossarena",
+  "timestamp": "2026-10-09T07:51:03.024Z"
 }
 ```
 
@@ -257,7 +283,7 @@ git commit -m "feat: complete day 1 project initialization and backend foundatio
 | Day | Milestone Focus |
 | :---: | :--- |
 | **Day 1** | **Project Initialization, Folder Structure & Backend Foundation (Completed)** |
-| **Day 2** | MySQL Database Architecture, Schemas, Connection Pool (`mysql2`) & Migrations |
+| **Day 2** | **MySQL Database Architecture, Schemas, Connection Pool (`mysql2`) & Migrations (Completed)** |
 | **Day 3** | User Registration, Secure Authentication, Password Hashing (`bcrypt`) & Session Store |
 | **Day 4** | Cricket Match Model, Fixtures API & Admin Match Creation |
 | **Day 5** | Public Match Browsing UI, Fixture Cards & Toss Lock-In Countdowns |

@@ -1,6 +1,6 @@
 /**
  * TossArena - Main Client-Side Script
- * Handles navigation interactions, responsive menus, and backend connectivity verification.
+ * Handles navigation interactions, responsive menus, and backend/database connectivity verification.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -33,7 +33,7 @@ function initMobileNavigation() {
 }
 
 /**
- * Verifies backend API connectivity and updates the status panel
+ * Verifies backend API & MySQL database connectivity and updates the status panel
  */
 async function checkBackendHealth() {
   const statusIndicator = document.getElementById('statusIndicator');
@@ -47,41 +47,72 @@ async function checkBackendHealth() {
   if (statusIndicator) {
     statusIndicator.className = 'ping-indicator';
   }
-  if (statusText) statusText.textContent = 'Checking API connection...';
+  if (statusText) statusText.textContent = 'Checking API & Database...';
 
   const startTime = performance.now();
   const healthEndpoint = window.TossArenaConfig
     ? window.TossArenaConfig.getApiUrl(window.TossArenaConfig.ENDPOINTS.HEALTH)
     : 'http://localhost:5000/api/health';
+  const dbHealthEndpoint = window.TossArenaConfig
+    ? window.TossArenaConfig.getApiUrl(window.TossArenaConfig.ENDPOINTS.HEALTH_DB)
+    : 'http://localhost:5000/api/health/db';
 
   try {
-    const response = await fetch(healthEndpoint, {
+    // 1. Check API Liveness
+    const apiResponse = await fetch(healthEndpoint, {
       method: 'GET',
-      headers: {
-        'Accept': 'application/json'
-      }
+      headers: { 'Accept': 'application/json' }
     });
 
     const latencyMs = Math.round(performance.now() - startTime);
 
-    if (response.ok) {
-      const data = await response.json();
-      if (statusIndicator) statusIndicator.className = 'ping-indicator online';
-      if (statusText) statusText.textContent = `Backend Online (${latencyMs}ms)`;
-
-      statusDetails.textContent = JSON.stringify(
-        {
-          endpoint: healthEndpoint,
-          httpStatus: `${response.status} ${response.statusText}`,
-          responsePayload: data,
-          clientLatency: `${latencyMs}ms`
-        },
-        null,
-        2
-      );
-    } else {
-      throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+    if (!apiResponse.ok) {
+      throw new Error(`API HTTP ${apiResponse.status} - ${apiResponse.statusText}`);
     }
+
+    const apiData = await apiResponse.json();
+
+    // 2. Check Database Readiness
+    let dbData = null;
+    let dbStatus = 'checking';
+    try {
+      const dbResponse = await fetch(dbHealthEndpoint, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+      dbData = await dbResponse.json();
+      dbStatus = dbResponse.ok ? 'connected' : 'unavailable';
+    } catch (e) {
+      dbStatus = 'unreachable';
+      dbData = { error: e.message };
+    }
+
+    if (statusIndicator) {
+      statusIndicator.className = dbStatus === 'connected' ? 'ping-indicator online' : 'ping-indicator';
+    }
+    if (statusText) {
+      statusText.textContent = dbStatus === 'connected' 
+        ? `API & DB Online (${latencyMs}ms)` 
+        : `API Online (${latencyMs}ms) | DB ${dbStatus}`;
+    }
+
+    statusDetails.textContent = JSON.stringify(
+      {
+        api: {
+          endpoint: healthEndpoint,
+          status: `${apiResponse.status} ${apiResponse.statusText}`,
+          payload: apiData
+        },
+        database: {
+          endpoint: dbHealthEndpoint,
+          status: dbStatus,
+          payload: dbData
+        },
+        clientLatency: `${latencyMs}ms`
+      },
+      null,
+      2
+    );
   } catch (error) {
     if (statusIndicator) statusIndicator.className = 'ping-indicator offline';
     if (statusText) statusText.textContent = 'Backend Offline';

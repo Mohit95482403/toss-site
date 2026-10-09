@@ -164,7 +164,8 @@ TossArena includes simulated banking workflows for educational UI demonstration:
 | **Frontend Design Tokens & Responsive CSS** | **Implemented** | Enhanced in Days 4–15 |
 | **Frontend Development Landing Page (`index.html`)** | **Implemented** | Enhanced in Days 4–15 |
 | **Client-to-Backend Health Ping Integration** | **Implemented** | Ongoing |
-| **MySQL Database Connection & Tables** | *Documented / Staged* | **Day 2** |
+| **MySQL Database Connection & Tables** | **Implemented** | Refined in Day 3–15 |
+| **Database Readiness Endpoint (`/api/health/db`)** | **Implemented** | Ongoing |
 | **User Registration, Login & Sessions (bcrypt)** | *Documented / Staged* | **Day 3** |
 | **Match Management & Fixtures API** | *Documented / Staged* | **Days 4–6** |
 | **Virtual Credit Wallet & Simulated Ledger** | *Documented / Staged* | **Days 7–9** |

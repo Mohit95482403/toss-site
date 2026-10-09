@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node tests/health.test.js"
+    "test": "node tests/health.test.js",
+    "test:db": "node scripts/test-db.js"
   },
   "keywords": [
     "cricket",
@@ -21,6 +22,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "helmet": "^8.0.0"
+    "helmet": "^8.0.0",
+    "mysql2": "^3.24.5"
   }
 }

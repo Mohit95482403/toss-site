@@ -1,9 +1,9 @@
 # Backend SQL Directory (`backend/sql`)
 
 ## Responsibilities
-- Contains raw SQL schema definitions, migration files, and initial seed scripts.
-- To be implemented on Day 2 with complete table definitions for users, wallets, matches, predictions, and transactions.
+- Houses raw SQL schema definitions, table DDLs, and development seed scripts.
+- Enforces strict InnoDB, `utf8mb4`, snake_case naming, foreign key constraints, and UTC timezone policies.
 
-## Planned Schema Scripts (Day 2)
-- `schema.sql`: Complete DDL for all TossArena tables.
-- `seeds.sql`: Initial seed data (default admin user, sample upcoming cricket matches).
+## Files
+- `schema.sql`: Complete DDL establishing the 7 foundational tables: `users`, `matches`, `wallets`, `predictions`, `wallet_transactions`, `notifications`, and `audit_logs`.
+- `seed-dev.sql`: Safe development demo records with sample cricket fixtures explicitly marked as `[DEMO]`. Contains zero real matches, default admins, or passwords.

@@ -9,6 +9,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const { ALLOWED_ORIGINS } = require('../config/env');
+const { closePool } = require('../config/db');
 const apiRoutes = require('../routes/api.routes');
 const healthController = require('../controllers/health.controller');
 const notFoundHandler = require('../middleware/notFound.middleware');
@@ -66,7 +67,7 @@ function makeRequest(path) {
 }
 
 async function runTests() {
-  console.log('--- Starting TossArena Backend Verification Tests ---');
+  console.log('--- Starting TossArena Backend & Database Verification Tests ---');
 
   await new Promise((resolve) => {
     testServer.listen(0, '127.0.0.1', resolve);
@@ -96,9 +97,23 @@ async function runTests() {
     assert.strictEqual(notFoundRes.body.success, false, '404 response should indicate success: false');
     console.log('✔ Test 3 Passed: 404 handler works as expected');
 
-    console.log('\nAll Day 1 backend verification checks PASSED successfully!');
+    // Test 4: GET /api/health/db returns structured database status without leaking secrets
+    console.log('Testing GET /api/health/db ...');
+    const dbHealthRes = await makeRequest('/api/health/db');
+    assert([200, 503].includes(dbHealthRes.statusCode), 'DB Health should return 200 or 503');
+    assert(typeof dbHealthRes.body === 'object', 'DB Health response should be JSON');
+    assert('database' in dbHealthRes.body, 'DB Health should include database status property');
+    assert(!JSON.stringify(dbHealthRes.body).includes('password'), 'DB Health must never leak password');
+    console.log(`✔ Test 4 Passed: GET /api/health/db returned HTTP ${dbHealthRes.statusCode} (${dbHealthRes.body.database})`);
+
+    console.log('\nAll backend verification checks PASSED successfully!');
   } finally {
     testServer.close();
+    try {
+      await closePool();
+    } catch (e) {
+      // Ignore pool close error
+    }
   }
 }
 

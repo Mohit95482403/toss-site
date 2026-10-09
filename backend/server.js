@@ -7,6 +7,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const { PORT, NODE_ENV, ALLOWED_ORIGINS } = require('./config/env');
+const { closePool } = require('./config/db');
 const apiRoutes = require('./routes/api.routes');
 const healthController = require('./controllers/health.controller');
 const notFoundHandler = require('./middleware/notFound.middleware');
@@ -69,14 +70,21 @@ const server = app.listen(PORT, () => {
   console.log(` Environment : ${NODE_ENV}`);
   console.log(` Port        : ${PORT}`);
   console.log(` Health Check: http://localhost:${PORT}/api/health`);
+  console.log(` DB Health   : http://localhost:${PORT}/api/health/db`);
   console.log(`=========================================`);
 });
 
 // 9. Graceful Shutdown Handlers
 const handleGracefulShutdown = (signal) => {
   console.log(`\nReceived ${signal}. Shutting down TossArena API gracefully...`);
-  server.close(() => {
-    console.log('HTTP server closed successfully. Process exiting.');
+  server.close(async () => {
+    console.log('HTTP server closed successfully.');
+    try {
+      await closePool();
+      console.log('Database pool closed successfully.');
+    } catch (dbErr) {
+      console.error('Error closing database pool:', dbErr.message);
+    }
     process.exit(0);
   });
 

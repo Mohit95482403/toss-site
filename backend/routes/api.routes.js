@@ -7,7 +7,10 @@ const express = require('express');
 const router = express.Router();
 const healthController = require('../controllers/health.controller');
 
-// Health check endpoint
+// Application health check endpoint (liveness)
 router.get('/health', healthController.getHealthStatus);
+
+// Database health check endpoint (readiness)
+router.get('/health/db', healthController.getDbHealthStatus);
 
 module.exports = router;
