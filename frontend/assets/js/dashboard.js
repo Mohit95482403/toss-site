@@ -30,11 +30,13 @@ async function initUserDashboard() {
   initDashboardLogout();
   initProfileForm();
   initWalletControls();
+  initDemoPackageControls();
 
   // 3. Load live backend data
   loadDashboardSummary();
   loadDashboardActivity();
   loadUpcomingMatchesPreview();
+  loadDemoPackages();
 }
 
 /**
@@ -392,6 +394,7 @@ function initDashboardNavigation() {
       walletLinks.forEach((l) => l.classList.add('active'));
       loadWalletBalance();
       loadWalletTransactions(1);
+      loadDemoPackages();
     } else {
       if (overviewSection) overviewSection.style.display = 'flex';
       if (pageTitle) pageTitle.textContent = 'Dashboard Overview';
@@ -824,3 +827,244 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
+
+/* ==========================================================================
+   DAY 9: VIRTUAL DEMO CREDIT PACKAGES & FUNDING SIMULATION
+   ========================================================================== */
+
+let selectedDemoPackage = null;
+let currentWalletBalanceNum = 0;
+
+/**
+ * Loads configured demo packages from /api/wallet/demo-packages
+ */
+async function loadDemoPackages() {
+  const container = document.getElementById('packagesContainer');
+  const alreadyClaimedSection = document.getElementById('sectionAlreadyClaimed');
+  const claimedDetailsText = document.getElementById('claimedPackageDetailsText');
+  const badgeEl = document.getElementById('packageClaimBadge');
+
+  if (!container && !alreadyClaimedSection) return;
+
+  try {
+    const res = await window.TossArenaAuth.getDemoPackages();
+    const data = res.data || {};
+    const packages = data.packages || [];
+    const userClaim = data.userClaim || { hasClaimed: false };
+
+    if (userClaim.hasClaimed) {
+      // User has already claimed their initial one-time grant
+      if (container) container.style.display = 'none';
+      if (alreadyClaimedSection) {
+        alreadyClaimedSection.style.display = 'flex';
+        if (claimedDetailsText) {
+          const dateStr = userClaim.claimedAt
+            ? new Date(userClaim.claimedAt).toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+              })
+            : 'earlier';
+          const pkgName = userClaim.claimedPackageName || userClaim.claimedPackageId || 'Initial';
+          const creditsStr = Number(userClaim.claimedCredits || 0).toLocaleString();
+          claimedDetailsText.innerHTML = `You claimed the <strong>${escapeHtml(pkgName)}</strong> package (+${creditsStr} demo credits) on ${dateStr}. Per platform rules, demo credit grants are strictly one-time per user account.`;
+        }
+      }
+      if (badgeEl) {
+        badgeEl.textContent = 'Grant Claimed';
+        badgeEl.className = 'badge badge-emerald';
+      }
+      return;
+    }
+
+    // User is eligible to claim
+    if (alreadyClaimedSection) alreadyClaimedSection.style.display = 'none';
+    if (container) {
+      container.style.display = 'grid';
+      container.innerHTML = '';
+
+      if (badgeEl) {
+        badgeEl.textContent = 'One-Time Initial Claim';
+        badgeEl.className = 'badge badge-amber';
+      }
+
+      packages.forEach((pkg) => {
+        const card = document.createElement('div');
+        card.className = 'package-card';
+        card.setAttribute('data-package-id', pkg.id);
+
+        const creditsFormatted = Number(pkg.demoCredits || 0).toLocaleString();
+
+        card.innerHTML = `
+          <div class="package-header">
+            <h4 class="package-name">${escapeHtml(pkg.name)}</h4>
+            <div class="package-credits">
+              ${creditsFormatted}
+              <span class="package-credits-unit">Demo Credits</span>
+            </div>
+            <div class="package-desc">${escapeHtml(pkg.description || 'Virtual demo credit allocation')}</div>
+          </div>
+          <div class="package-features">
+            <div class="package-feature-item">
+              <span class="package-feature-icon">🛡️</span>
+              <span>100% Virtual • No Cash Value</span>
+            </div>
+            <div class="package-feature-item">
+              <span class="package-feature-icon">⚡</span>
+              <span>Instant Simulated Allocation</span>
+            </div>
+            <div class="package-feature-item">
+              <span class="package-feature-icon">🎯</span>
+              <span>For Toss Forecast Testing Only</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm btn-select-package" style="width: 100%; margin-top: auto;" data-package-id="${escapeHtml(pkg.id)}" data-package-name="${escapeHtml(pkg.name)}" data-package-credits="${pkg.demoCredits}">
+            Select ${escapeHtml(pkg.name)} →
+          </button>
+        `;
+
+        container.appendChild(card);
+      });
+
+      // Bind selection handlers
+      container.querySelectorAll('.btn-select-package').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const pkgId = btn.getAttribute('data-package-id');
+          const pkgName = btn.getAttribute('data-package-name');
+          const pkgCredits = Number(btn.getAttribute('data-package-credits') || 0);
+          openClaimModal({ id: pkgId, name: pkgName, demoCredits: pkgCredits });
+        });
+      });
+    }
+  } catch (err) {
+    console.error('Failed to load demo packages:', err);
+    if (container) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; padding: var(--space-6); text-align: center; color: #fca5a5; font-size: var(--text-xs);">
+          ⚠️ Unable to load available demo packages. Please verify server connection and refresh.
+        </div>
+      `;
+    }
+  }
+}
+
+/**
+ * Opens claim confirmation modal
+ */
+function openClaimModal(pkg) {
+  selectedDemoPackage = pkg;
+
+  const modal = document.getElementById('claimConfirmModal');
+  const pkgNameEl = document.getElementById('modalPackageName');
+  const creditsAmountEl = document.getElementById('modalCreditsAmount');
+  const currentBalanceEl = document.getElementById('modalCurrentBalance');
+  const expectedBalanceEl = document.getElementById('modalExpectedBalance');
+  const alertEl = document.getElementById('modalClaimAlert');
+  const confirmBtn = document.getElementById('btnConfirmClaim');
+
+  if (!modal) return;
+
+  if (alertEl) {
+    alertEl.style.display = 'none';
+    alertEl.textContent = '';
+    alertEl.className = 'alert-banner';
+  }
+
+  if (confirmBtn) {
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Confirm & Add Credits';
+  }
+
+  // Read current balance
+  const balanceText = document.getElementById('walletBalanceAmount')?.textContent || '0';
+  const cleanBalance = parseFloat(balanceText.replace(/,/g, '')) || 0;
+  currentWalletBalanceNum = cleanBalance;
+  const expected = cleanBalance + (pkg.demoCredits || 0);
+
+  if (pkgNameEl) pkgNameEl.textContent = `${pkg.name} Package`;
+  if (creditsAmountEl) creditsAmountEl.textContent = `+${Number(pkg.demoCredits || 0).toLocaleString()} Demo Credits`;
+  if (currentBalanceEl) currentBalanceEl.textContent = `${cleanBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Credits`;
+  if (expectedBalanceEl) expectedBalanceEl.textContent = `${expected.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Credits`;
+
+  modal.classList.add('is-open');
+}
+
+/**
+ * Closes claim confirmation modal
+ */
+function closeClaimModal() {
+  const modal = document.getElementById('claimConfirmModal');
+  if (modal) modal.classList.remove('is-open');
+  selectedDemoPackage = null;
+}
+
+/**
+ * Initializes Demo Package controls, modal listeners, and claim submission
+ */
+function initDemoPackageControls() {
+  const modal = document.getElementById('claimConfirmModal');
+  const cancelBtn = document.getElementById('btnCancelClaim');
+  const cancelXBtn = document.getElementById('btnCancelClaimX');
+  const confirmBtn = document.getElementById('btnConfirmClaim');
+  const alertEl = document.getElementById('modalClaimAlert');
+
+  if (cancelBtn) cancelBtn.addEventListener('click', closeClaimModal);
+  if (cancelXBtn) cancelXBtn.addEventListener('click', closeClaimModal);
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeClaimModal();
+      }
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && modal.classList.contains('is-open')) {
+      closeClaimModal();
+    }
+  });
+
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', async () => {
+      if (!selectedDemoPackage) return;
+
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '<span>⏳ Processing Simulated Allocation...</span>';
+
+      if (alertEl) {
+        alertEl.style.display = 'none';
+        alertEl.textContent = '';
+      }
+
+      // Generate client-side idempotency key
+      const idempotencyKey = `claim_${currentDashboardUser ? currentDashboardUser.id : 'usr'}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+      try {
+        const result = await window.TossArenaAuth.claimDemoCredits(selectedDemoPackage.id, idempotencyKey);
+
+        // Success!
+        closeClaimModal();
+
+        // Refresh all relevant states
+        await loadWalletBalance();
+        loadDashboardSummary();
+        loadWalletTransactions(1);
+        await loadDemoPackages();
+
+        // Show feedback alert/notification
+        alert(`✅ Success: ${result.message || 'Simulated demo credits have been successfully allocated to your wallet!'}`);
+      } catch (err) {
+        console.error('Claim demo credits error:', err);
+        if (alertEl) {
+          alertEl.textContent = err.message || 'Failed to claim demo credits.';
+          alertEl.className = 'alert-banner alert-banner-error';
+          alertEl.style.display = 'block';
+        }
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Confirm & Add Credits';
+      }
+    });
+  }
+}
+

@@ -29,7 +29,10 @@ const TossArenaConfig = (function () {
       USER_PROFILE: '/users/me',
       PREDICTIONS: '/predictions',
       WALLET: '/wallet/me',
-      WALLET_TRANSACTIONS: '/wallet/transactions'
+      WALLET_TRANSACTIONS: '/wallet/transactions',
+      WALLET_PACKAGES: '/wallet/demo-packages',
+      WALLET_CLAIM: '/wallet/claim-demo-credits',
+      WALLET_CLAIM_STATUS: '/wallet/claim-status'
     },
 
 

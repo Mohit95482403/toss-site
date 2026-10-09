@@ -125,7 +125,10 @@
               </div>
             </div>
             <div class="wallet-hero-actions">
-              <button type="button" class="btn btn-primary btn-sm" id="walletRefreshBalanceBtn">
+              <a href="#sectionClaimPackages" class="btn btn-primary btn-sm" id="btnScrollToClaim">
+                + Add Demo Credits
+              </a>
+              <button type="button" class="btn btn-outline btn-sm" id="walletRefreshBalanceBtn">
                 ↻ Refresh Balance
               </button>
             </div>
@@ -138,6 +141,46 @@
               <strong style="color: #fbbf24;">Strict Virtual Policy:</strong> This wallet operates exclusively with demonstration units. Real-money deposits, cash betting, payment gateway integrations, and monetary withdrawals are strictly prohibited and non-existent on TossArena.
             </div>
           </div>
+
+          <!-- SECTION: DEMO PACKAGES & FUNDING SIMULATION (Day 9) -->
+          <section class="dash-panel" id="sectionClaimPackages" aria-label="Simulated Demo Credit Packages">
+            <div class="dash-panel-header" style="flex-wrap: wrap; gap: var(--space-3);">
+              <div>
+                <div class="dash-panel-title">
+                  <span>🪙</span> Add Demo Credits (Simulation)
+                </div>
+                <div style="font-size: var(--text-xs); color: var(--text-muted); margin-top: 0.25rem;">
+                  Demo credits are for platform testing and entertainment only. They have no monetary value and cannot be withdrawn, transferred, or exchanged for cash.
+                </div>
+              </div>
+              <span class="badge badge-amber" id="packageClaimBadge" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;">
+                One-Time Initial Claim
+              </span>
+            </div>
+
+            <!-- Dynamic Package Cards Container -->
+            <div class="package-grid" id="packagesContainer">
+              <div class="skeleton-card skeleton-shimmer" style="height: 160px;"></div>
+              <div class="skeleton-card skeleton-shimmer" style="height: 160px;"></div>
+              <div class="skeleton-card skeleton-shimmer" style="height: 160px;"></div>
+              <div class="skeleton-card skeleton-shimmer" style="height: 160px;"></div>
+            </div>
+
+            <!-- Already Claimed Banner (Hidden by default until claimStatus confirms) -->
+            <div class="package-claimed-card" id="sectionAlreadyClaimed" style="display: none;">
+              <div class="package-claimed-info">
+                <div class="package-claimed-title">
+                  <span>✅</span> One-Time Demo Package Claimed
+                </div>
+                <div class="package-claimed-details" id="claimedPackageDetailsText">
+                  You have already claimed your one-time virtual demo credit allocation.
+                </div>
+              </div>
+              <a href="#walletTxTable" class="btn btn-outline btn-sm">
+                View in Ledger ↓
+              </a>
+            </div>
+          </section>
 
           <!-- Transaction Ledger Section -->
           <section class="dash-panel" aria-label="Transaction Ledger">
@@ -241,6 +284,51 @@
             </div>
           </section>
         </div>
+
+        <!-- Modal: Confirm Simulated Demo Credit Claim (Day 9) -->
+        <div class="claim-modal-backdrop" id="claimConfirmModal" role="dialog" aria-modal="true" aria-labelledby="claimModalTitle">
+          <div class="claim-modal-box">
+            <div class="modal-header">
+              <h3 id="claimModalTitle" style="font-size: var(--text-lg); font-weight: 700; color: var(--text-primary); margin: 0;">
+                Confirm Simulated Allocation
+              </h3>
+              <button type="button" class="btn btn-outline btn-sm modal-close-btn" id="btnCancelClaimX" aria-label="Close modal">✕</button>
+            </div>
+
+            <div class="modal-body" style="display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-4) 0;">
+              <div style="background: rgba(25, 211, 162, 0.08); border: 1px solid rgba(25, 211, 162, 0.25); border-radius: var(--radius-md); padding: var(--space-4);">
+                <div style="font-size: var(--text-xs); color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Selected Package</div>
+                <div style="font-size: var(--text-lg); font-weight: 800; color: var(--accent-mint);" id="modalPackageName">Standard Package</div>
+                <div style="font-size: var(--text-sm); font-weight: 700; color: var(--text-primary); margin-top: 2px;" id="modalCreditsAmount">+1,000 Demo Credits</div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; font-size: var(--text-xs); color: var(--text-secondary); padding: 0 var(--space-2);">
+                <span>Current Balance:</span>
+                <span style="font-weight: 700; color: var(--text-primary);" id="modalCurrentBalance">---</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: var(--text-xs); color: var(--text-secondary); padding: 0 var(--space-2);">
+                <span>Expected Resulting Balance:</span>
+                <span style="font-weight: 700; color: var(--accent-mint);" id="modalExpectedBalance">---</span>
+              </div>
+
+              <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--radius-sm); padding: var(--space-3); font-size: 0.75rem; color: var(--text-muted); line-height: 1.45;">
+                🛡️ <strong>Simulation Notice:</strong> Demo credits are purely virtual tokens for testing toss forecasts. No real money, payment gateways, or cash conversions exist on TossArena.
+              </div>
+
+              <div id="modalClaimAlert" class="alert-banner" style="display: none;" role="alert"></div>
+            </div>
+
+            <div class="modal-actions" style="display: flex; justify-content: flex-end; gap: var(--space-3);">
+              <button type="button" class="btn btn-outline btn-sm" id="btnCancelClaim">
+                Cancel
+              </button>
+              <button type="button" class="btn btn-primary btn-sm" id="btnConfirmClaim">
+                Confirm &amp; Add Credits
+              </button>
+            </div>
+          </div>
+        </div>
+
       </main>
 
       <!-- Dashboard Footer -->

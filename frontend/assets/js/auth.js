@@ -410,6 +410,87 @@ const TossArenaAuth = (function () {
     };
   }
 
+  /**
+   * Retrieves server-defined virtual demo packages
+   * @returns {Promise<{ packages: Array, userClaim: object|null }>}
+   */
+  async function getDemoPackages() {
+    const endpoint = window.TossArenaConfig?.ENDPOINTS?.WALLET_PACKAGES || '/wallet/demo-packages';
+    const response = await fetch(getUrl(endpoint), {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to retrieve demo credit packages.');
+    }
+    return {
+      packages: data.data || [],
+      userClaim: data.userClaim || null
+    };
+  }
+
+  /**
+   * Retrieves one-time demo package claim status for authenticated user
+   * @returns {Promise<{ hasClaimed: boolean, claim: object|null }>}
+   */
+  async function getClaimStatus() {
+    const endpoint = window.TossArenaConfig?.ENDPOINTS?.WALLET_CLAIM_STATUS || '/wallet/claim-status';
+    const response = await fetch(getUrl(endpoint), {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to retrieve claim status.');
+    }
+    return data.data || { hasClaimed: false, claim: null };
+  }
+
+  /**
+   * Claims a one-time virtual demo credit package
+   * @param {string} packageId
+   * @param {string} [idempotencyKey]
+   * @returns {Promise<object>}
+   */
+  async function claimDemoCredits(packageId, idempotencyKey = null) {
+    const token = await getCsrfToken();
+    const endpoint = window.TossArenaConfig?.ENDPOINTS?.WALLET_CLAIM || '/wallet/claim-demo-credits';
+
+    const finalKey = idempotencyKey || `idem-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+    const response = await fetch(getUrl(endpoint), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-Token': token
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        packageId,
+        idempotencyKey: finalKey
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      if (response.status === 403 && data.code === 'EBADCSRFTOKEN') {
+        cachedCsrfToken = null;
+      }
+      const err = new Error(data.message || 'Failed to claim demo credits.');
+      err.code = data.code;
+      err.data = data.data;
+      throw err;
+    }
+
+    return data;
+  }
+
   return {
     getCsrfToken,
     register,
@@ -422,7 +503,10 @@ const TossArenaAuth = (function () {
     updateNavState,
     initPasswordToggles,
     getWallet,
-    getWalletTransactions
+    getWalletTransactions,
+    getDemoPackages,
+    getClaimStatus,
+    claimDemoCredits
   };
 })();
 

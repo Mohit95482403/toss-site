@@ -79,6 +79,14 @@ Day 1 establishes the production-grade foundation for the entire 20-day roadmap:
 - [x] **Day 8 User Dashboard & Dedicated Wallet UI (`frontend/user/wallet.html` & `frontend/user/dashboard.html`):** Dynamic balance cards, transaction ledger table with responsive overflow, type filtering, pagination controls, friendly empty states, error retry handling, and virtual credit disclaimers.
 - [x] **Day 8 Prediction Integration Audit (Scenario A):** Maintained existing Day 7 prediction behavior (`demo_credits_used = 0.00`) without inventing arbitrary stakes, with the wallet engine ready for future approved stake policies.
 - [x] **Day 8 Automated Test Suites (`npm run test:wallet` & `npm run test:e2e:wallet`):** 21 unit/integration tests and 19 live E2E server tests with 100% pass rate (104 total tests passing across all suites).
+- [x] **Day 9 Virtual Demo Credit Addition & Wallet Funding Simulation:**
+  - **Server-Authoritative Package Catalog:** Starter (500), Standard (1,000), Advanced (2,500), and Premium (5,000) virtual demo credits configured strictly on backend; client cannot inject custom amounts.
+  - **One-Time Grant Policy (Section 6 Option B):** Database-enforced uniqueness via `wallet_package_claims` table with `uq_claims_user_id` constraint, strictly preventing duplicate allocations across sessions and devices.
+  - **Atomic Balance & Ledger Persistence:** Row-level locking (`SELECT ... FOR UPDATE`), single transactional commit updating wallet balance, writing immutable `demo_grant` entry with `reference_type = 'package_claim'`, logging in-app notification, and registering the claim.
+  - **Idempotency Protection:** Enforced by unique constraint `uq_claims_idempotency`; safe retries replay previous grant metadata (`isReplay: true`) with HTTP 200 without double crediting; cross-user key reuse is rejected with HTTP 409 Conflict.
+  - **CSRF & Authentication Security:** Session-based identity validation, account status checks (`active` only), and strict CSRF token verification on state-changing endpoints.
+  - **UI Integration:** Dynamic package selection grid, confirmation modal with real-time balance calculations, one-time claim badge, and "Already Claimed" view on both `frontend/user/wallet.html` and `frontend/user/dashboard.html`.
+  - **Automated Test Coverage:** 16 comprehensive unit/integration tests (`npm run test:funding`) and 10 live E2E integration tests (`npm run test:e2e:funding`), bringing total test suite to 120/120 passing (100% pass rate).
 
 ---
 
@@ -490,6 +498,61 @@ git commit -m "feat: complete day 7 toss prediction engine, submission, and vali
 
 ---
 
+---
+
+## 13. Day 9: Virtual Demo Credit Addition & Wallet Funding Simulation
+
+### 13.1 Strict Virtual Demo Credit Guardrail
+TossArena is exclusively a cricket coin-toss forecasting simulation platform. All wallet balances, ledger entries, and credit additions operate 100% on virtual demo tokens.
+- **Strictly No Real Money:** No fiat currency, credit/debit card processing, UPI, net banking, or payment gateways (Razorpay, Stripe, etc.).
+- **Strictly Non-Redeemable:** Demo credits hold zero monetary value and cannot be withdrawn, transferred to third parties, or exchanged for cash.
+- **Mandatory User Notice:** Prominently rendered across wallet interfaces:  
+  *"Demo credits are for platform testing and entertainment only. They have no monetary value and cannot be withdrawn, transferred, or exchanged for cash."*
+
+### 13.2 Server-Authoritative Package Catalog
+Credit amounts are defined strictly on the server in `backend/services/walletService.js`. The client submits only a `packageId`:
+| Package ID | Display Name | Virtual Demo Credits | Purpose |
+| :--- | :--- | :---: | :--- |
+| `starter` | Starter Package | **500** | Casual testing and match previews |
+| `standard` | Standard Package | **1,000** | Standard match toss forecasting |
+| `advanced` | Advanced Package | **2,500** | Seasoned cricket forecasting |
+| `premium` | Premium Package | **5,000** | High-volume simulated participation |
+
+*Any client attempt to inject custom amounts (`demoCredits`, `amount`, `balance`) is rejected with HTTP 400 (`CLIENT_AMOUNT_REJECTED`).*
+
+### 13.3 One-Time Initial Claim Policy & Concurrency Defense
+Per Section 6 Option B of the project specifications, demo credit packages are implemented as a **one-time initial claim**:
+1. **Database Constraint:** `wallet_package_claims` table contains a unique key on `user_id` (`uq_claims_user_id`). The MySQL storage engine guarantees that no user can hold more than one claim record.
+2. **Row-Level Serialization:** The transaction serializes on the user's existing wallet record (`SELECT id, balance FROM wallets WHERE id = ? FOR UPDATE`). This eliminates InnoDB gap-lock deadlocks during concurrent bursts.
+3. **Double Claim Defense:** Subsequent requests return HTTP 409 Conflict (`PACKAGE_ALREADY_CLAIMED`) with the metadata of the previously claimed package.
+4. **Idempotency Protection:** Enforced by unique key `uq_claims_idempotency`. Retrying with the same key returns HTTP 200 with `{ isReplay: true }` without incrementing balance or generating duplicate ledger rows. Reusing an idempotency key across different users is rejected with HTTP 409 Conflict (`IDEMPOTENCY_KEY_CONFLICT`).
+
+### 13.4 API Endpoints
+- `GET /api/wallet/demo-packages`
+  - **Auth:** Optional session authentication.
+  - **Returns:** List of configured demo packages and current user's claim status (`hasClaimed: boolean`).
+- `GET /api/wallet/claim-status`
+  - **Auth:** Required (`authenticate`).
+  - **Returns:** `{ hasClaimed: true/false, claim: { packageId, demoCredits, claimedAt } }`.
+- `POST /api/wallet/claim-demo-credits`
+  - **Auth:** Required (`authenticate`, `verifyCsrf`).
+  - **Payload:** `{ "packageId": "starter", "idempotencyKey": "string (optional)" }`.
+  - **Returns:** HTTP 201 Created on initial success; HTTP 200 on idempotent replay; HTTP 409 on second claim attempt.
+
+### 13.5 Running Day 9 Automated Tests
+```bash
+# Run unit & integration test suite (16 tests)
+npm run test:funding
+
+# Run live E2E integration test against port 5000 & 5500 (10 tests)
+npm run test:e2e:funding
+
+# Run full project regression suite (120 tests across Days 1–9)
+npm test
+```
+
+---
+
 ## 14. 20-Day Development Roadmap
 
 | Day | Milestone Focus |
@@ -502,7 +565,7 @@ git commit -m "feat: complete day 7 toss prediction engine, submission, and vali
 | **Day 6** | **Match Browsing, Match Details, Search, Filters, Pagination & Backend Integration (Completed)** |
 | **Day 7** | **Toss Prediction Engine: Market Rules, Cutoff Times & Submission (Completed)** |
 | **Day 8** | **Virtual Demo Credit Wallet System, Ledger Audit Trails & Balance Management (Completed)** |
-| **Day 9** | Simulated Top-Up & Withdrawal Simulation Workflows (Zero Real Money) |
+| **Day 9** | **Virtual Demo Credit Addition, Wallet Funding Simulation & Transaction History (Completed)** |
 | **Day 10** | Prediction Placement Frontend Interface & Real-Time Balance Validation |
 | **Day 11** | User Active Predictions & Historical Prediction Log Views |
 | **Day 12** | Admin Portal Authentication, Role Verification & Admin Layout |
@@ -517,7 +580,7 @@ git commit -m "feat: complete day 7 toss prediction engine, submission, and vali
 
 ---
 
-## 14. License & Disclaimer
+## 15. License & Disclaimer
 
 This project is licensed under the ISC License. Strictly for demonstration and simulation purposes with 100% virtual demo credits. Real currency betting, payments, and cash redemptions are strictly prohibited.
 

@@ -6,14 +6,16 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node tests/health.test.js && node tests/auth.test.js && node tests/dashboard.test.js && node tests/matches.test.js && node tests/predictions.test.js && node tests/wallet.test.js",
+    "test": "node tests/health.test.js && node tests/auth.test.js && node tests/dashboard.test.js && node tests/matches.test.js && node tests/predictions.test.js && node tests/wallet.test.js && node tests/wallet-funding.test.js",
     "test:db": "node scripts/test-db.js",
     "test:auth": "node tests/auth.test.js",
     "test:dashboard": "node tests/dashboard.test.js",
     "test:matches": "node tests/matches.test.js",
     "test:predictions": "node tests/predictions.test.js",
     "test:wallet": "node tests/wallet.test.js",
-    "test:e2e:wallet": "node tests/e2e-wallet.test.js"
+    "test:funding": "node tests/wallet-funding.test.js",
+    "test:e2e:wallet": "node tests/e2e-wallet.test.js",
+    "test:e2e:funding": "node tests/e2e-wallet-funding.test.js"
   },
 
 

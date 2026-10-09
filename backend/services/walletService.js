@@ -490,14 +490,327 @@ async function executeWalletCredit(userId, {
   });
 }
 
+// ============================================================================
+// DAY 9: PREDEFINED DEMO CREDIT PACKAGES & CLAIM LOGIC
+// ============================================================================
+
+const DEMO_PACKAGES = Object.freeze({
+  starter: {
+    id: 'starter',
+    name: 'Starter',
+    demoCredits: 500.00,
+    description: '500 Virtual Demo Credits for casual testing and match previews.'
+  },
+  standard: {
+    id: 'standard',
+    name: 'Standard',
+    demoCredits: 1000.00,
+    description: '1,000 Virtual Demo Credits for match coin-toss forecasting.'
+  },
+  advanced: {
+    id: 'advanced',
+    name: 'Advanced',
+    demoCredits: 2500.00,
+    description: '2,500 Virtual Demo Credits for seasoned cricket strategists.'
+  },
+  premium: {
+    id: 'premium',
+    name: 'Premium',
+    demoCredits: 5000.00,
+    description: '5,000 Virtual Demo Credits for high-volume simulated participation.'
+  }
+});
+
+/**
+ * Retrieves the available server-defined virtual demo packages
+ * @param {number} [userId] - Optional authenticated user ID to attach claim status
+ * @returns {Promise<{ packages: Array, userClaim: object|null }>}
+ */
+async function getDemoPackages(userId = null) {
+  const packagesList = Object.values(DEMO_PACKAGES).map((p) => ({
+    id: p.id,
+    name: p.name,
+    demoCredits: p.demoCredits,
+    description: p.description
+  }));
+
+  let userClaim = null;
+  if (userId) {
+    userClaim = await getUserClaimStatus(userId);
+  }
+
+  return {
+    packages: packagesList,
+    userClaim
+  };
+}
+
+/**
+ * Checks whether an authenticated user has already claimed their one-time virtual package
+ * @param {number} userId
+ * @returns {Promise<{ hasClaimed: boolean, claim: object|null }>}
+ */
+async function getUserClaimStatus(userId) {
+  if (!userId) return { hasClaimed: false, claim: null };
+
+  const [rows] = await pool.query(
+    `SELECT package_id, demo_credits, idempotency_key, transaction_id, claimed_at
+     FROM wallet_package_claims
+     WHERE user_id = ?
+     LIMIT 1`,
+    [userId]
+  );
+
+  if (rows.length === 0) {
+    return { hasClaimed: false, claim: null };
+  }
+
+  const r = rows[0];
+  const pkgConfig = DEMO_PACKAGES[r.package_id];
+
+  return {
+    hasClaimed: true,
+    claim: {
+      packageId: r.package_id,
+      packageName: pkgConfig ? pkgConfig.name : r.package_id,
+      demoCredits: roundCredits(r.demo_credits),
+      claimedAt: r.claimed_at,
+      transactionId: r.transaction_id
+    }
+  };
+}
+
+/**
+ * Executes one-time demo-credit package claim with database-level uniqueness,
+ * row-level locking, and idempotency protection.
+ *
+ * @param {object} params
+ * @param {number} params.userId - Authenticated user identifier
+ * @param {string} params.packageId - Server-validated package ID ('starter', 'standard', etc.)
+ * @param {string} [params.idempotencyKey] - Client-supplied or generated unique operation key
+ * @returns {Promise<object>}
+ */
+async function claimDemoPackage({ userId, packageId, idempotencyKey = null }) {
+  if (!userId || !Number.isInteger(userId) || userId <= 0) {
+    const err = new Error('Invalid authenticated user identity.');
+    err.status = 401;
+    err.code = 'UNAUTHORIZED';
+    throw err;
+  }
+
+  // 1. Validate packageId against server allowlist
+  if (!packageId || typeof packageId !== 'string') {
+    const err = new Error('Package identifier is required.');
+    err.status = 400;
+    err.code = 'INVALID_PACKAGE_ID';
+    throw err;
+  }
+
+  const cleanPackageId = packageId.trim().toLowerCase();
+  const selectedPackage = DEMO_PACKAGES[cleanPackageId];
+  if (!selectedPackage) {
+    const err = new Error(
+      `Unknown demo package "${packageId}". Allowed packages: ${Object.keys(DEMO_PACKAGES).join(', ')}.`
+    );
+    err.status = 400;
+    err.code = 'INVALID_PACKAGE_ID';
+    throw err;
+  }
+
+  // 2. Validate / normalize idempotency key
+  const finalIdempotencyKey = idempotencyKey && typeof idempotencyKey === 'string' && idempotencyKey.trim().length >= 8
+    ? idempotencyKey.trim().substring(0, 128)
+    : `claim-${userId}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+  // 3. Verify user status
+  const [userRows] = await pool.query('SELECT status FROM users WHERE id = ?', [userId]);
+  if (userRows.length === 0 || userRows[0].status !== 'active') {
+    const err = new Error('Your account is not eligible for virtual credit allocations.');
+    err.status = 403;
+    err.code = 'ACCOUNT_NOT_ELIGIBLE';
+    throw err;
+  }
+
+  // 4. Begin transaction with row-level locking
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    // 1. Retrieve and serialize on user's wallet with exclusive row-level lock
+    const wallet = await getOrCreateUserWallet(userId, conn);
+    const [walletLock] = await conn.query(
+      'SELECT id, balance FROM wallets WHERE id = ? FOR UPDATE',
+      [wallet.id]
+    );
+
+    // 2. Check if user already claimed within serialized transaction
+    const [existingClaims] = await conn.query(
+      `SELECT id, package_id, demo_credits, idempotency_key, transaction_id, claimed_at
+       FROM wallet_package_claims
+       WHERE user_id = ?
+       LIMIT 1`,
+      [userId]
+    );
+
+    if (existingClaims.length > 0) {
+      const claim = existingClaims[0];
+      // Check if this is an idempotent retry with the exact same key
+      if (idempotencyKey && claim.idempotency_key === idempotencyKey.trim()) {
+        await conn.commit();
+        const pkg = DEMO_PACKAGES[claim.package_id];
+        return {
+          isReplay: true,
+          packageId: claim.package_id,
+          packageName: pkg ? pkg.name : claim.package_id,
+          demoCredits: roundCredits(claim.demo_credits),
+          demoCreditsGranted: roundCredits(claim.demo_credits),
+          balanceBefore: roundCredits(walletLock[0].balance),
+          newBalance: roundCredits(walletLock[0].balance),
+          transactionId: claim.transaction_id,
+          claimedAt: claim.claimed_at
+        };
+      }
+
+      await conn.rollback();
+      const err = new Error('You have already claimed your one-time virtual demo credit package.');
+      err.status = 409;
+      err.code = 'PACKAGE_ALREADY_CLAIMED';
+      err.data = {
+        claimedPackageId: claim.package_id,
+        demoCredits: roundCredits(claim.demo_credits),
+        claimedAt: claim.claimed_at
+      };
+      throw err;
+    }
+
+    // 3. Check if idempotency key was previously consumed (conflict defense)
+    const [keyConflict] = await conn.query(
+      'SELECT id, user_id FROM wallet_package_claims WHERE idempotency_key = ? LIMIT 1',
+      [finalIdempotencyKey]
+    );
+    if (keyConflict.length > 0) {
+      await conn.rollback();
+      const err = new Error('Idempotency key has already been used for another operation.');
+      err.status = 409;
+      err.code = 'IDEMPOTENCY_KEY_CONFLICT';
+      throw err;
+    }
+    const balanceBefore = roundCredits(walletLock[0].balance);
+    const grantAmount = selectedPackage.demoCredits;
+    const balanceAfter = roundCredits(balanceBefore + grantAmount);
+
+    // Update wallet balance
+    await conn.query(
+      'UPDATE wallets SET balance = ?, updated_at = UTC_TIMESTAMP() WHERE id = ?',
+      [balanceAfter, wallet.id]
+    );
+
+    // Insert transaction into ledger
+    const [txResult] = await conn.query(
+      `INSERT INTO wallet_transactions (
+         wallet_id,
+         transaction_type,
+         amount,
+         balance_before,
+         balance_after,
+         reference_type,
+         reference_id,
+         description,
+         created_at
+       ) VALUES (?, 'demo_grant', ?, ?, ?, 'package_claim', NULL, ?, UTC_TIMESTAMP())`,
+      [
+        wallet.id,
+        grantAmount,
+        balanceBefore,
+        balanceAfter,
+        `Claimed ${selectedPackage.name} Package (${grantAmount.toLocaleString()} virtual demo credits)`
+      ]
+    );
+    const transactionId = txResult.insertId;
+
+    // Insert claim record into wallet_package_claims (unique constraint defense)
+    const [claimResult] = await conn.query(
+      `INSERT INTO wallet_package_claims (
+         user_id,
+         wallet_id,
+         package_id,
+         demo_credits,
+         transaction_id,
+         idempotency_key,
+         claimed_at
+       ) VALUES (?, ?, ?, ?, ?, ?, UTC_TIMESTAMP())`,
+      [
+        userId,
+        wallet.id,
+        cleanPackageId,
+        grantAmount,
+        transactionId,
+        finalIdempotencyKey
+      ]
+    );
+    const claimId = claimResult.insertId;
+
+    // Cross-reference transaction to claim
+    await conn.query(
+      'UPDATE wallet_transactions SET reference_id = ? WHERE id = ?',
+      [claimId, transactionId]
+    );
+
+    // Record welcome in-app notification
+    await conn.query(
+      `INSERT INTO notifications (user_id, title, message, type, is_read, created_at)
+       VALUES (?, 'Demo Credits Added', ?, 'wallet_grant', 0, UTC_TIMESTAMP())`,
+      [
+        userId,
+        `Successfully funded your wallet with ${grantAmount.toLocaleString()} virtual demo credits (${selectedPackage.name} Package). 100% demo simulation.`
+      ]
+    );
+
+    await conn.commit();
+
+    return {
+      isReplay: false,
+      packageId: cleanPackageId,
+      packageName: selectedPackage.name,
+      demoCredits: grantAmount,
+      demoCreditsGranted: grantAmount,
+      balanceBefore,
+      newBalance: balanceAfter,
+      transactionId,
+      claimedAt: new Date().toISOString()
+    };
+  } catch (error) {
+    await conn.rollback();
+    if (
+      error.code === 'ER_DUP_ENTRY' ||
+      error.errno === 1062 ||
+      error.code === 'ER_LOCK_DEADLOCK' ||
+      error.errno === 1213
+    ) {
+      const err = new Error('You have already claimed your one-time virtual demo credit package.');
+      err.status = 409;
+      err.code = 'PACKAGE_ALREADY_CLAIMED';
+      throw err;
+    }
+    throw error;
+  } finally {
+    conn.release();
+  }
+}
+
 module.exports = {
   VALID_TRANSACTION_TYPES,
   DEFAULT_INITIAL_CREDITS,
+  DEMO_PACKAGES,
   roundCredits,
   getOrCreateUserWallet,
   getWalletBalance,
   getUserTransactions,
   processBalanceOperation,
   executeWalletDebit,
-  executeWalletCredit
+  executeWalletCredit,
+  getDemoPackages,
+  getUserClaimStatus,
+  claimDemoPackage
 };
+
