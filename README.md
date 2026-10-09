@@ -56,6 +56,10 @@ Day 1 establishes the production-grade foundation for the entire 20-day roadmap:
 - [x] **Day 2 Database Test Script:** Created `backend/scripts/test-db.js` (`npm run test:db`).
 - [x] **Day 2 Readiness Endpoint:** Implemented `GET /api/health/db` reporting live MySQL status without leaking secrets.
 - [x] **Day 2 Demo Seed Script:** Created `backend/sql/seed-dev.sql` with safe idempotent fixtures.
+- [x] **Day 3 Premium Homepage (`frontend/index.html`):** Hero with atmospheric lighting, 4 experience highlights, featured matches dynamic feed, 3-step how-it-works, 6-feature grid, responsible demo policy, and dynamic footer.
+- [x] **Day 3 Match Explorer (`frontend/pages/matches.html`):** Debounced keyword search, status filter chips, responsive cards, loading skeletons, and graceful empty/error states via `matches.js`.
+- [x] **Day 3 Rules & FAQ (`frontend/pages/how-to-play.html`):** 4-step explanation guide and accessible interactive FAQ accordion.
+- [x] **Day 3 Responsive Navigation & Drawer:** Slide-in drawer with backdrop, Escape-key closing, link auto-closing, and support for viewports from 360px to 1920px.
 
 ---
 
@@ -284,9 +288,9 @@ git commit -m "feat: complete day 1 project initialization and backend foundatio
 | :---: | :--- |
 | **Day 1** | **Project Initialization, Folder Structure & Backend Foundation (Completed)** |
 | **Day 2** | **MySQL Database Architecture, Schemas, Connection Pool (`mysql2`) & Migrations (Completed)** |
-| **Day 3** | User Registration, Secure Authentication, Password Hashing (`bcrypt`) & Session Store |
-| **Day 4** | Cricket Match Model, Fixtures API & Admin Match Creation |
-| **Day 5** | Public Match Browsing UI, Fixture Cards & Toss Lock-In Countdowns |
+| **Day 3** | **Premium Public Website, Landing Page, Navigation & API Integration (Completed)** |
+| **Day 4** | Authentication Foundation — Registration, Login, Password Hashing, Sessions, Validation, and Role-Aware Access |
+| **Day 5** | Cricket Match Model, Fixtures API & Admin Match Creation |
 | **Day 6** | Coin Toss Prediction Model, Multi-Market Validation & Odds Service |
 | **Day 7** | Virtual Credit Wallet Model, Ledger Schema & 1,000 Signup Bonus Credit Distribution |
 | **Day 8** | Simulated Wallet Top-Up & Withdrawal Simulation Workflows (Zero Real Money) |

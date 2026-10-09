@@ -80,6 +80,45 @@ All client-backend interactions follow RESTful conventions over HTTP/HTTPS:
 | **Status Codes** | `200 OK`, `201 Created`, `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, `500 Internal Error` |
 | **CORS Policy** | Origin-whitelisted with explicit credentials support (`corsOptions` in `server.js`). Wildcards are forbidden when credentials are enabled. |
 
+### 3.1 Documented Future Matches API Contract (`GET /api/matches`)
+
+*Scheduled for implementation in upcoming match management phase.*
+
+- **Method:** `GET`
+- **Path:** `/api/matches`
+- **Query Parameters:**
+  - `status` *(string, optional)*: Filter by match status (`upcoming`, `open`, `locked`, `completed`, `cancelled`).
+  - `search` *(string, optional)*: Keyword search across team names, titles, and venues.
+  - `tournament` *(string, optional)*: Filter by tournament name.
+  - `page` *(number, optional, default: 1)*: Page number for paginated results.
+  - `limit` *(number, optional, default: 12)*: Number of fixtures per page.
+- **Proposed Response Schema:**
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": 1,
+        "title": "[DEMO] India vs Australia - Champions Trophy Simulation",
+        "team_a": "India",
+        "team_b": "Australia",
+        "tournament_name": "Demo International Series",
+        "venue": "Melbourne Cricket Ground (Demo)",
+        "scheduled_at": "2026-10-11T12:00:00.000Z",
+        "status": "open",
+        "result_toss_winner": null,
+        "result_decision": null
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 12,
+      "total": 1,
+      "totalPages": 1
+    }
+  }
+  ```
+
 ---
 
 ## 4. Security & Authentication Architecture (Planned Day 3)
@@ -161,13 +200,16 @@ TossArena includes simulated banking workflows for educational UI demonstration:
 | **Security Headers (Helmet) & CORS** | **Implemented** | Ongoing |
 | **Centralized Error & 404 Handlers** | **Implemented** | Ongoing |
 | **Automated Health Check Endpoint (`/api/health`)** | **Implemented** | Ongoing |
-| **Frontend Design Tokens & Responsive CSS** | **Implemented** | Enhanced in Days 4–15 |
-| **Frontend Development Landing Page (`index.html`)** | **Implemented** | Enhanced in Days 4–15 |
+| **Frontend Design Tokens & Responsive CSS** | **Implemented** | Ongoing |
+| **Frontend Development Landing Page (`index.html`)** | **Implemented** | Refined in Day 3 |
 | **Client-to-Backend Health Ping Integration** | **Implemented** | Ongoing |
-| **MySQL Database Connection & Tables** | **Implemented** | Refined in Day 3–15 |
+| **MySQL Database Connection & Tables** | **Implemented** | Refined in Day 4–15 |
 | **Database Readiness Endpoint (`/api/health/db`)** | **Implemented** | Ongoing |
-| **User Registration, Login & Sessions (bcrypt)** | *Documented / Staged* | **Day 3** |
-| **Match Management & Fixtures API** | *Documented / Staged* | **Days 4–6** |
+| **Premium Public Website & Landing Page** | **Implemented** | Day 3 |
+| **Matches Page with Filters & Search (`matches.html`)**| **Implemented** | Day 3 |
+| **How to Play & Interactive FAQ (`how-to-play.html`)** | **Implemented** | Day 3 |
+| **User Registration, Login & Sessions (bcrypt)** | *Documented / Staged* | **Day 4** |
+| **Match Management & Fixtures API** | *Documented / Staged* | **Day 5** |
 | **Virtual Credit Wallet & Simulated Ledger** | *Documented / Staged* | **Days 7–9** |
 | **Toss Prediction Engine & Countdown Clocks** | *Documented / Staged* | **Days 10–12** |
 | **Admin Management & Result Settlement** | *Documented / Staged* | **Days 13–15** |

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register — TossArena (Demo Credits Platform)</title>
-  <meta name="description" content="Create an account on TossArena to receive 1,000 complimentary virtual demo credits.">
+  <title>Create Account — TossArena (Virtual Demo Platform)</title>
+  <meta name="description" content="Register an account on TossArena to receive 1,000 complimentary virtual demo credits for cricket coin toss predictions.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
@@ -13,44 +13,57 @@
   <link rel="stylesheet" href="../assets/css/responsive.css">
 </head>
 <body>
+  <!-- Header -->
   <header class="site-header">
     <div class="container navbar">
-      <a href="../index.html" class="brand-logo">
+      <a href="../index.html" class="brand-logo" aria-label="TossArena Home">
         <div class="brand-icon">T</div>
         <span>Toss<span class="highlight">Arena</span></span>
       </a>
-      <a href="../index.html" class="btn btn-outline btn-sm">← Back to Home</a>
+      <div style="display: flex; gap: var(--space-3); align-items: center;">
+        <a href="login.html" class="nav-link">Sign In</a>
+        <a href="../index.html" class="btn btn-outline btn-sm">← Back to Home</a>
+      </div>
     </div>
   </header>
 
-  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 1rem;">
-    <div class="card card-glass" style="max-width: 460px; width: 100%; text-align: center;">
-      <span class="badge badge-dev" style="margin-bottom: 1rem;">Under Construction • Planned Day 3</span>
-      <h1 style="font-size: 1.75rem; margin-bottom: 0.5rem;">Join TossArena</h1>
-      <p style="margin-bottom: 1.5rem; font-size: 0.9rem;">
-        New account registration with automatic initial demo wallet allotment (1,000 virtual credits) is scheduled for Day 3.
+  <!-- Main Content -->
+  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: var(--space-12) var(--space-4);">
+    <div class="match-card" style="max-width: 480px; width: 100%; text-align: center; padding: var(--space-8) var(--space-6);">
+      <span class="badge badge-amber" style="margin-bottom: var(--space-4);">
+        Scheduled for Day 4 • Authentication Foundation
+      </span>
+      <h1 style="font-size: var(--text-2xl); margin-bottom: var(--space-2);">Create Account</h1>
+      <p style="margin-bottom: var(--space-6); font-size: var(--text-sm);">
+        New user registration with automatic demo wallet provisioning (1,000 complimentary virtual credits) is scheduled for Day 4.
       </p>
 
-      <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem; text-align: left;">
-        <div style="font-weight: 600; color: var(--accent-emerald-light); font-size: 0.85rem; margin-bottom: 0.5rem;">
-          🎁 Welcome Perk (Demo Only):
+      <!-- Welcome Perk Box -->
+      <div style="background: rgba(25, 211, 162, 0.08); border: 1px solid rgba(25, 211, 162, 0.25); border-radius: var(--radius-sm); padding: var(--space-5); margin-bottom: var(--space-6); text-align: left;">
+        <div style="font-weight: 700; color: var(--accent-mint); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-2);">
+          🎁 Onboarding Grant (100% Virtual):
         </div>
-        <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">
-          All new registered users will receive 1,000 complimentary virtual credits automatically loaded into their demo wallet. No real monetary deposit required or accepted.
+        <p style="font-size: var(--text-xs); color: var(--text-secondary); margin: 0; line-height: 1.5;">
+          Upon registration, your account is automatically credited with 1,000 demo credits. No actual money is ever requested, charged, or accepted.
         </p>
       </div>
 
-      <div style="display: flex; gap: 0.75rem; justify-content: center;">
+      <div style="display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap;">
         <a href="login.html" class="btn btn-outline btn-sm">Already Have an Account?</a>
-        <a href="../index.html" class="btn btn-secondary btn-sm">Return Home</a>
+        <a href="../index.html" class="btn btn-secondary btn-sm">Return to Home</a>
       </div>
     </div>
   </main>
 
-  <footer class="site-footer">
-    <div class="container footer-bottom">
-      <p>&copy; 2026 TossArena. Strictly a virtual-credit simulation platform.</p>
+  <!-- Footer -->
+  <footer class="site-footer" style="padding: var(--space-6) 0;">
+    <div class="container footer-bottom" style="border-top: none; padding-top: 0;">
+      <p>&copy; <span id="currentYear">2026</span> TossArena. Strictly a virtual-credit simulation platform.</p>
+      <p>Day 3: Public Website</p>
     </div>
   </footer>
+
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/main.js"></script>
 </body>
 </html>

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login — TossArena (Demo Credits Platform)</title>
-  <meta name="description" content="User login portal for TossArena virtual credit prediction platform.">
+  <title>Sign In — TossArena (Virtual Demo Platform)</title>
+  <meta name="description" content="Sign in to TossArena to manage your virtual demo credit wallet and view cricket toss predictions.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
@@ -13,46 +13,58 @@
   <link rel="stylesheet" href="../assets/css/responsive.css">
 </head>
 <body>
+  <!-- Header -->
   <header class="site-header">
     <div class="container navbar">
-      <a href="../index.html" class="brand-logo">
+      <a href="../index.html" class="brand-logo" aria-label="TossArena Home">
         <div class="brand-icon">T</div>
         <span>Toss<span class="highlight">Arena</span></span>
       </a>
-      <a href="../index.html" class="btn btn-outline btn-sm">← Back to Home</a>
+      <div style="display: flex; gap: var(--space-3); align-items: center;">
+        <a href="matches.html" class="nav-link" style="display: none; @media(min-width:600px){display:block;}">Matches</a>
+        <a href="../index.html" class="btn btn-outline btn-sm">← Back to Home</a>
+      </div>
     </div>
   </header>
 
-  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 1rem;">
-    <div class="card card-glass" style="max-width: 440px; width: 100%; text-align: center;">
-      <span class="badge badge-dev" style="margin-bottom: 1rem;">Under Construction • Planned Day 3</span>
-      <h1 style="font-size: 1.75rem; margin-bottom: 0.5rem;">User Sign In</h1>
-      <p style="margin-bottom: 1.5rem; font-size: 0.9rem;">
-        Authentication service with secure session handling and password hashing is scheduled for Day 3.
+  <!-- Main Content -->
+  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: var(--space-12) var(--space-4);">
+    <div class="match-card" style="max-width: 460px; width: 100%; text-align: center; padding: var(--space-8) var(--space-6);">
+      <span class="badge badge-amber" style="margin-bottom: var(--space-4);">
+        Scheduled for Day 4 • Authentication Foundation
+      </span>
+      <h1 style="font-size: var(--text-2xl); margin-bottom: var(--space-2);">User Sign In</h1>
+      <p style="margin-bottom: var(--space-6); font-size: var(--text-sm);">
+        Authentication workflows with secure sessions, bcrypt password hashing, and role validation are scheduled for implementation on Day 4.
       </p>
 
-      <div style="background: rgba(255,255,255,0.03); border: 1px dashed var(--border-card); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem;">
-        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
-          Planned Fields:
-        </p>
-        <ul style="list-style: none; font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.35rem;">
-          <li>• Username or Email Address</li>
-          <li>• Encrypted Password</li>
-          <li>• Session 'Remember Me' Cookie</li>
+      <div style="background: var(--bg-elevated); border: 1px dashed var(--border-medium); border-radius: var(--radius-sm); padding: var(--space-5); margin-bottom: var(--space-6); text-align: left;">
+        <div style="font-weight: 700; color: var(--accent-mint); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-2);">
+          Planned Authentication Architecture:
+        </div>
+        <ul style="list-style: none; font-size: var(--text-xs); color: var(--text-secondary); display: flex; flex-direction: column; gap: var(--space-2);">
+          <li>• Validated Email / Username &amp; Password inputs</li>
+          <li>• HTTP-Only secure session cookies (`express-session`)</li>
+          <li>• Role-aware redirection (Regular User vs Administrator)</li>
         </ul>
       </div>
 
-      <div style="display: flex; gap: 0.75rem; justify-content: center;">
-        <a href="register.html" class="btn btn-primary btn-sm">Go to Register</a>
-        <a href="../index.html" class="btn btn-secondary btn-sm">Return Home</a>
+      <div style="display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap;">
+        <a href="register.html" class="btn btn-primary btn-sm">Create New Account</a>
+        <a href="../index.html" class="btn btn-secondary btn-sm">Return to Home</a>
       </div>
     </div>
   </main>
 
-  <footer class="site-footer">
-    <div class="container footer-bottom">
-      <p>&copy; 2026 TossArena. Virtual-credit platform only.</p>
+  <!-- Footer -->
+  <footer class="site-footer" style="padding: var(--space-6) 0;">
+    <div class="container footer-bottom" style="border-top: none; padding-top: 0;">
+      <p>&copy; <span id="currentYear">2026</span> TossArena. Strictly a virtual-credit simulation platform.</p>
+      <p>Day 3: Public Website</p>
     </div>
   </footer>
+
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/main.js"></script>
 </body>
 </html>

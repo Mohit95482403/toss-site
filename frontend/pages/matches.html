@@ -3,56 +3,173 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Matches — TossArena (Demo Credits Platform)</title>
-  <meta name="description" content="Upcoming cricket matches available for virtual coin toss predictions.">
+  <title>Cricket Matches &amp; Fixtures — TossArena (Demo Platform)</title>
+  <meta name="description" content="Browse upcoming cricket fixtures and explore virtual coin toss predictions. 100% demo credits platform.">
+
+  <!-- Typography: Inter & Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
 </head>
 <body>
-  <header class="site-header">
+  <!-- Mobile Navigation Backdrop Overlay -->
+  <div class="nav-backdrop" id="navBackdrop" aria-hidden="true"></div>
+
+  <!-- Header -->
+  <header class="site-header" id="siteHeader">
     <div class="container navbar">
-      <a href="../index.html" class="brand-logo">
+      <a href="../index.html" class="brand-logo" aria-label="TossArena Home">
         <div class="brand-icon">T</div>
         <span>Toss<span class="highlight">Arena</span></span>
       </a>
-      <a href="../index.html" class="btn btn-outline btn-sm">← Back to Home</a>
+
+      <!-- Desktop Navigation Menu -->
+      <nav aria-label="Main Navigation">
+        <ul class="nav-menu" id="navMenu">
+          <li class="nav-menu-header" style="display: none;">
+            <span class="brand-logo" style="font-size: 1.1rem;">
+              <span class="brand-icon" style="width: 28px; height: 28px; font-size: 0.9rem;">T</span>
+              <span>Toss<span class="highlight">Arena</span></span>
+            </span>
+            <button type="button" class="nav-close-btn" id="mobileNavClose" aria-label="Close menu">&times;</button>
+          </li>
+          <li><a href="../index.html" class="nav-link">Home</a></li>
+          <li><a href="matches.html" class="nav-link active">Matches</a></li>
+          <li><a href="how-to-play.html" class="nav-link">How to Play</a></li>
+          <li><a href="../user/dashboard.html" class="nav-link">User Dashboard</a></li>
+
+          <!-- Mobile Actions -->
+          <li class="nav-actions-mobile">
+            <a href="login.html" class="btn btn-outline btn-sm">Sign In</a>
+            <a href="register.html" class="btn btn-primary btn-sm">Create Account</a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Desktop Action Buttons -->
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-outline btn-sm">Sign In</a>
+        <a href="register.html" class="btn btn-primary btn-sm">Create Account</a>
+      </div>
+
+      <!-- Mobile Hamburger Toggle Button -->
+      <button type="button" class="mobile-toggle" id="mobileNavToggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navMenu">
+        ☰
+      </button>
     </div>
   </header>
 
-  <main style="flex: 1; padding: 3rem 1rem;">
-    <div class="container" style="max-width: 800px; text-align: center;">
-      <span class="badge badge-dev" style="margin-bottom: 1rem;">Under Construction • Planned Day 4</span>
-      <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">Cricket Match Fixtures</h1>
-      <p style="margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
-        Real-time match schedules, coin toss timers, and prediction placement cards are scheduled for implementation in Days 4–6.
-      </p>
-
-      <div class="card" style="text-align: left; background: var(--bg-card); border: 1px dashed var(--border-card);">
-        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--accent-emerald-light);">
-          Upcoming Match Architecture:
-        </h3>
-        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem; color: var(--text-secondary);">
-          <li>📅 <strong>Match Discovery:</strong> Dynamic database queries pulling upcoming fixtures with countdown clocks.</li>
-          <li>⏱️ <strong>Toss Lock-in:</strong> Automated prediction cutoff exact to match toss protocol (e.g. 30 minutes before first ball).</li>
-          <li>🪙 <strong>Dual Market:</strong> Predictions on both Toss Winner (Team A vs Team B) and Toss Decision (Bat vs Bowl).</li>
-          <li>📊 <strong>Virtual demo odds:</strong> Calculated multipliers with transparent payouts.</li>
-        </ul>
+  <!-- Main Content -->
+  <main style="flex: 1; padding: var(--space-12) 0 var(--space-16) 0;">
+    <div class="container">
+      <!-- Page Header -->
+      <div class="section-header" style="text-align: left; max-width: 100%; margin-bottom: var(--space-8);">
+        <span class="badge badge-emerald" style="margin-bottom: var(--space-2);">Cricket Fixtures</span>
+        <h1 style="font-size: clamp(2rem, 4vw, 2.75rem); margin-bottom: var(--space-2);">Match Explorer</h1>
+        <p style="max-width: 720px;">
+          Explore scheduled domestic and international matches. Select an open match to analyze team toss strategy and place virtual predictions once live submission opens.
+        </p>
       </div>
 
-      <div style="margin-top: 2rem;">
-        <a href="../index.html" class="btn btn-primary btn-sm">Return to Home</a>
+      <!-- Filter & Search Toolbar -->
+      <div class="filter-bar">
+        <!-- Search Input -->
+        <div class="search-box">
+          <span class="search-icon-inside" aria-hidden="true">🔍</span>
+          <input
+            type="search"
+            id="matchSearchInput"
+            class="search-input"
+            placeholder="Search teams, tournaments, or venues..."
+            aria-label="Search cricket fixtures"
+          >
+        </div>
+
+        <!-- Status Filter Chips -->
+        <div class="status-filters" role="group" aria-label="Filter matches by status">
+          <button type="button" class="filter-chip active" data-status="all">All Matches</button>
+          <button type="button" class="filter-chip" data-status="open">Open</button>
+          <button type="button" class="filter-chip" data-status="upcoming">Upcoming</button>
+          <button type="button" class="filter-chip" data-status="locked">Locked</button>
+          <button type="button" class="filter-chip" data-status="completed">Completed</button>
+        </div>
+
+        <!-- Reset Button -->
+        <button type="button" class="btn btn-secondary btn-sm" id="resetFiltersBtn">
+          Reset Filters
+        </button>
+      </div>
+
+      <!-- Matches Grid Container (dynamically managed by matches.js) -->
+      <div class="matches-grid" id="matchesListContainer">
+        <div class="skeleton-card skeleton-shimmer"></div>
+        <div class="skeleton-card skeleton-shimmer"></div>
+        <div class="skeleton-card skeleton-shimmer"></div>
+        <div class="skeleton-card skeleton-shimmer"></div>
       </div>
     </div>
   </main>
 
+  <!-- Footer -->
   <footer class="site-footer">
-    <div class="container footer-bottom">
-      <p>&copy; 2026 TossArena. Strictly a virtual-credit simulation platform.</p>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <div class="brand-logo" style="margin-bottom: var(--space-3);">
+            <div class="brand-icon">T</div>
+            <span>Toss<span class="highlight">Arena</span></span>
+          </div>
+          <p style="font-size: 0.85rem; line-height: 1.6;">
+            A premier cricket coin toss forecasting and entertainment platform using virtual demo credits exclusively. Built for cricket fans worldwide.
+          </p>
+        </div>
+
+        <div class="footer-links-group">
+          <div class="footer-col">
+            <h5>Navigation</h5>
+            <ul>
+              <li><a href="../index.html">Home</a></li>
+              <li><a href="matches.html">Matches</a></li>
+              <li><a href="how-to-play.html">How to Play</a></li>
+              <li><a href="../user/dashboard.html">User Dashboard</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h5>Account &amp; Access</h5>
+            <ul>
+              <li><a href="login.html">Sign In</a></li>
+              <li><a href="register.html">Create Account</a></li>
+              <li><a href="../admin/login.html">Admin Portal</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h5>Scope Notice</h5>
+            <ul>
+              <li><span style="color: var(--text-muted);">Virtual Credits Only</span></li>
+              <li><span style="color: var(--text-muted);">No Real Currency</span></li>
+              <li><span style="color: var(--text-muted);">Non-Redeemable</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; <span id="currentYear">2026</span> TossArena. Strictly a virtual-credit simulation platform.</p>
+        <p>Day 3: Premium Public Website</p>
+      </div>
     </div>
   </footer>
+
+  <!-- Scripts -->
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/matches.js"></script>
 </body>
 </html>
